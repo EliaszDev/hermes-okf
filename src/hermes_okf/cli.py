@@ -7,7 +7,6 @@ and search OKF bundles from the terminal.
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -211,11 +210,12 @@ def main(argv: list[str] | None = None) -> int:
         parser.print_help()
         return 0
 
-    return args.func(args)
+    return int(args.func(args))
 
 
 def _snapshot(args: argparse.Namespace) -> int:
     from hermes_okf.hermes import HermesAgent
+
     agent = HermesAgent(args.path, args.agent_id)
     agent.snapshot(note=args.note)
     print("Snapshot saved.")
@@ -224,6 +224,7 @@ def _snapshot(args: argparse.Namespace) -> int:
 
 def _context(args: argparse.Namespace) -> int:
     from hermes_okf.hermes import HermesAgent
+
     agent = HermesAgent(args.path, args.agent_id)
     ctx = agent.build_context(args.query, top_k=args.top_k)
     print(ctx)
@@ -232,6 +233,7 @@ def _context(args: argparse.Namespace) -> int:
 
 def _sessions(args: argparse.Namespace) -> int:
     from hermes_okf.hermes import HermesAgent
+
     agent = HermesAgent(args.path, "hermes")
     for sid in agent.list_sessions():
         print(sid)
@@ -251,6 +253,7 @@ def _plans(args: argparse.Namespace) -> int:
 
 def _tools(args: argparse.Namespace) -> int:
     from hermes_okf.hermes import HermesAgent
+
     agent = HermesAgent(args.path, "hermes")
     for t in agent.list_tools():
         print(t)

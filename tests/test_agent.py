@@ -2,7 +2,10 @@
 
 import tempfile
 
-from hermes_okf.agent import HermesMemoryMixin, memorize_decision, memorize_observation, memorize_tool
+from hermes_okf.agent import (
+    HermesMemoryMixin,
+    memorize_decision,
+)
 
 
 class DummyAgent(HermesMemoryMixin):
@@ -51,6 +54,7 @@ class TestDecorators:
     def test_standalone_decorator_with_memory(self):
         with tempfile.TemporaryDirectory() as tmp:
             from hermes_okf.memory import HermesMemory
+
             mem = HermesMemory(tmp, agent_id="standalone")
 
             @memorize_decision(memory=mem)

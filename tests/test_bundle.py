@@ -1,9 +1,6 @@
 """Tests for hermes_okf.bundle."""
 
 import tempfile
-from pathlib import Path
-
-import pytest
 
 from hermes_okf.bundle import OKFBundle
 from hermes_okf.concept import Concept

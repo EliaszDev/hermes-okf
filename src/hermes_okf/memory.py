@@ -91,9 +91,7 @@ class HermesMemory:
         result_summary: str,
     ) -> None:
         """Log a tool call and its outcome."""
-        self.bundle.append_log(
-            f"Tool '{tool_name}': {result_summary}", category="Tool-Call"
-        )
+        self.bundle.append_log(f"Tool '{tool_name}': {result_summary}", category="Tool-Call")
 
     # ------------------------------------------------------------------
     # Context retrieval

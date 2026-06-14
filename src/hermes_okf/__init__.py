@@ -5,12 +5,12 @@ Open Knowledge Format (OKF). Provides persistent memory, knowledge graphs,
 and structured context for AI agents.
 """
 
-from hermes_okf.hermes import HermesAgent
 from hermes_okf.bundle import OKFBundle
 from hermes_okf.concept import Concept
 from hermes_okf.graph import GraphExtractor
-from hermes_okf.search import SearchIndex
+from hermes_okf.hermes import HermesAgent
 from hermes_okf.memory import HermesMemory
+from hermes_okf.search import SearchIndex
 from hermes_okf.validators import OKFValidator
 
 __version__ = "0.2.0"

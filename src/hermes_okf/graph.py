@@ -6,15 +6,12 @@ and tag clustering. No RDF, no Cypher — just portable conventions.
 
 from __future__ import annotations
 
-from collections import defaultdict
 import os
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from hermes_okf.bundle import OKFBundle
-from hermes_okf.concept import Concept
 
 
 class GraphExtractor:

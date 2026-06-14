@@ -41,7 +41,7 @@ class OKFBundle:
         """Create minimal conformant OKF structure."""
         self._write_file(
             "index.md",
-            "---\nokf_version: \"0.1\"\n---\n\n# Knowledge Index\n\n"
+            '---\nokf_version: "0.1"\n---\n\n# Knowledge Index\n\n'
             "* [Projects](projects/)\n"
             "* [Decisions](decisions/)\n"
             "* [Context](context/)\n",
@@ -123,9 +123,7 @@ class OKFBundle:
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
         if "timestamp" not in frontmatter:
-            frontmatter["timestamp"] = datetime.now(timezone.utc).strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
-            )
+            frontmatter["timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         yaml_block = yaml.dump(frontmatter, sort_keys=False, allow_unicode=True)
         content = f"---\n{yaml_block}---\n\n{body.strip()}\n"
@@ -158,10 +156,7 @@ class OKFBundle:
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         line = f"* **{category}**: {entry}\n"
 
-        if log_path.exists():
-            content = log_path.read_text(encoding="utf-8")
-        else:
-            content = "# Agent Log\n\n"
+        content = log_path.read_text(encoding="utf-8") if log_path.exists() else "# Agent Log\n\n"
 
         if f"## {today}" not in content:
             content += f"\n## {today}\n"

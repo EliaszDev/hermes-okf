@@ -7,7 +7,6 @@ For heavier loads, the optional RAG integration can be used instead.
 from __future__ import annotations
 
 import re
-from pathlib import Path
 from typing import Callable
 
 from hermes_okf.bundle import OKFBundle
@@ -123,7 +122,7 @@ class SearchIndex:
             query_tokens = set(self._tokenize(query))
             if not query_tokens:
                 return []
-            results: list[tuple[str, float]] = []
+            fallback_results: list[tuple[str, float]] = []
             for concept_id in self.bundle.list_concepts():
                 concept = self.bundle.read_concept(concept_id)
                 if not concept:
@@ -133,5 +132,5 @@ class SearchIndex:
                     continue
                 overlap = len(query_tokens & text_tokens) / len(query_tokens)
                 if overlap >= threshold:
-                    results.append((concept_id, overlap))
-            return sorted(results, key=lambda x: x[1], reverse=True)
+                    fallback_results.append((concept_id, overlap))
+            return sorted(fallback_results, key=lambda x: x[1], reverse=True)

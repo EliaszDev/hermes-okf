@@ -7,7 +7,6 @@ Minimal enforcement: only ``type`` frontmatter field is required.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import yaml
 
@@ -84,9 +83,7 @@ class OKFValidator:
         try:
             metadata = yaml.safe_load(parts[1]) or {}
         except yaml.YAMLError as exc:
-            self.errors.append(
-                OKFValidationError(rel_path, f"Invalid YAML frontmatter: {exc}")
-            )
+            self.errors.append(OKFValidationError(rel_path, f"Invalid YAML frontmatter: {exc}"))
             return
 
         if not isinstance(metadata, dict):
@@ -97,9 +94,7 @@ class OKFValidator:
 
         if "type" not in metadata:
             self.errors.append(
-                OKFValidationError(
-                    rel_path, "Missing required 'type' field in frontmatter", line=1
-                )
+                OKFValidationError(rel_path, "Missing required 'type' field in frontmatter", line=1)
             )
 
     # ------------------------------------------------------------------

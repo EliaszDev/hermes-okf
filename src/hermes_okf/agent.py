@@ -8,12 +8,12 @@ from __future__ import annotations
 
 import functools
 import inspect
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from hermes_okf.memory import HermesMemory
 
 
-def _get_memory(args: tuple[Any, ...]) -> Optional[HermesMemory]:
+def _get_memory(args: tuple[Any, ...]) -> HermesMemory | None:
     """Try to extract a memory object from the first positional arg (self)."""
     if not args:
         return None
@@ -24,9 +24,9 @@ def _get_memory(args: tuple[Any, ...]) -> Optional[HermesMemory]:
 
 
 def memorize_decision(
-    fn: Optional[Callable[..., Any]] = None,
+    fn: Callable[..., Any] | None = None,
     *,
-    memory: Optional[HermesMemory] = None,
+    memory: HermesMemory | None = None,
 ) -> Callable[..., Any]:
     """Decorator: persist the function's return value as a Decision.
 
@@ -77,9 +77,9 @@ def memorize_decision(
 
 
 def memorize_observation(
-    fn: Optional[Callable[..., Any]] = None,
+    fn: Callable[..., Any] | None = None,
     *,
-    memory: Optional[HermesMemory] = None,
+    memory: HermesMemory | None = None,
 ) -> Callable[..., Any]:
     """Decorator: log each call as an Observation."""
 
@@ -109,9 +109,9 @@ def memorize_observation(
 
 
 def memorize_tool(
-    fn: Optional[Callable[..., Any]] = None,
+    fn: Callable[..., Any] | None = None,
     *,
-    memory: Optional[HermesMemory] = None,
+    memory: HermesMemory | None = None,
 ) -> Callable[..., Any]:
     """Decorator: log each call as a Tool-Call."""
 

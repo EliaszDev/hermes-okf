@@ -10,11 +10,11 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from typing import Any, Callable
+from typing import Any
 
-from hermes_okf.agent import HermesMemoryMixin, memorize_decision, memorize_tool, memorize_observation
-from hermes_okf.bundle import OKFBundle
-from hermes_okf.memory import HermesMemory
+from hermes_okf.agent import (
+    HermesMemoryMixin,
+)
 
 
 class HermesAgent(HermesMemoryMixin):
@@ -174,7 +174,9 @@ class HermesAgent(HermesMemoryMixin):
             progress=0,
         )
         self.current_plan_id = plan_id
-        self.memory.record_observation(f"Plan created: {task} ({len(steps)} steps)", category="Plan")
+        self.memory.record_observation(
+            f"Plan created: {task} ({len(steps)} steps)", category="Plan"
+        )
         return plan_id
 
     def complete_step(self, step_index: int, result: str = "") -> None:
