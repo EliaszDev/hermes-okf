@@ -41,6 +41,12 @@ def register_cli(subparser: argparse.ArgumentParser) -> None:
     list_parser.add_argument("--type", help="Filter by type")
     list_parser.set_defaults(func=_cli_list)
 
+    # hermes okf show <path> [--raw]
+    show_parser = okf_sub.add_parser("show", help="Show full content of an OKF concept")
+    show_parser.add_argument("path", help="Concept path (e.g. config/agent, sessions/2026-06-14T22-14-58Z)")
+    show_parser.add_argument("--raw", action="store_true", help="Print raw markdown without metadata")
+    show_parser.set_defaults(func=_cli_show)
+
     # hermes okf snapshot
     snapshot_parser = okf_sub.add_parser("snapshot", help="Save memory snapshot")
     snapshot_parser.add_argument("--note", default="", help="Snapshot note")
@@ -83,6 +89,28 @@ def _cli_list(args: argparse.Namespace) -> None:
         if args.type and concept.type != args.type:
             continue
         print(f"  [{concept.type}] {concept.id}")
+
+
+def _cli_show(args: argparse.Namespace) -> None:
+    """Handle ``hermes okf show <path>``."""
+    from hermes_okf import HermesOKFProvider
+
+    provider = HermesOKFProvider()
+    concept = provider.agent.memory.bundle.read_concept(args.path)
+    if concept is None:
+        print(f"Concept not found: {args.path}")
+        return
+
+    if args.raw:
+        print(concept.content)
+    else:
+        print(f"\n[{concept.type}] {concept.id}")
+        if concept.metadata:
+            print("Metadata:")
+            for k, v in concept.metadata.items():
+                print(f"  {k}: {v}")
+        print("---")
+        print(concept.content)
 
 
 def _cli_snapshot(args: argparse.Namespace) -> None:
