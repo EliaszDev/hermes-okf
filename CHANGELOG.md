@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2] - 2026-06-14
+
+### Fixed
+- CLI plugin registration — pip-installed packages cannot use convention-based `cli.py` discovery; now registers via general `hermes_agent.plugins` entry point with `ctx.register_cli_command("okf", ...)`
+- `register_cli()` signature corrected — receives `argparse.ArgumentParser` directly (the `okf` parser), not a `_SubParsersAction` that would double-nest the command
+- Removed dead `register_cli` and `_cli_*` handlers from `memory_plugin.py` (they were never called by Hermes)
+- New `plugin.py` — general Hermes plugin registration bridge; new `cli_extension.py` — clean CLI tree builder
+- Users should run `pip install --upgrade hermes-okf` to get the working CLI
+
 ## [0.3.1] - 2026-06-14
 
 ### Added
