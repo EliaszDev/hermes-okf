@@ -42,9 +42,16 @@ def register_cli(subparser: argparse.ArgumentParser) -> None:
     list_parser.set_defaults(func=_cli_list)
 
     # hermes okf show <path> [--raw]
-    show_parser = okf_sub.add_parser("show", help="Show full content of an OKF concept")
-    show_parser.add_argument("path", help="Concept path (e.g. config/agent, sessions/2026-06-14T22-14-58Z)")
-    show_parser.add_argument("--raw", action="store_true", help="Print raw markdown without metadata")
+    show_parser = okf_sub.add_parser(
+        "show", help="Show full content of an OKF concept"
+    )
+    show_parser.add_argument(
+        "path",
+        help="Concept path (e.g. config/agent, sessions/2026-06-14T22-14-58Z)",
+    )
+    show_parser.add_argument(
+        "--raw", action="store_true", help="Print raw markdown without metadata"
+    )
     show_parser.set_defaults(func=_cli_show)
 
     # hermes okf snapshot
