@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.6] - 2026-06-14
+
+### Fixed
+- CI black formatting — `cli_extension.py` had `add_parser` call split across 3 lines when it fit on 1 line (88 chars), causing `black --check` to fail
+- `hermes.py` and `plugin.py` — split lines that were 110 and 103 chars respectively
+
 ## [0.3.5] - 2026-06-14
 
 ### Fixed
