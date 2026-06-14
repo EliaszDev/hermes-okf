@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-06-14
+
+### Added
+- `hermes_okf/install_plugin.py` — install/uninstall Hermes plugin wrapper to `~/.hermes/plugins/hermes-okf/`
+- `hermes-okf-install` CLI command — creates the plugin directory so `hermes memory setup` discovers hermes-okf
+- `hermes-okf-uninstall` CLI command — removes the plugin wrapper
+
+### Why
+Hermes uses filesystem-based discovery (`~/.hermes/plugins/`) not `importlib.metadata` entry points. The `hermes.memory_providers` entry point was dead code. Now users run `pip install hermes-okf && hermes-okf-install` to activate.
+
 ## [0.3.9] - 2026-06-14
 
 ### Fixed
