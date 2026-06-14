@@ -399,7 +399,7 @@ pip install --upgrade hermes-okf
 
 - Open issues: [github.com/EliaszDev/hermes-okf/issues](https://github.com/EliaszDev/hermes-okf/issues)
 - Hermes Agent: [github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)
-- OKF Spec: [cloud.google.com/knowledge-catalog](https://cloud.google.com/knowledge-catalog)
+- OKF Spec: [cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
 ---
 

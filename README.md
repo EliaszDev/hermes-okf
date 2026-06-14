@@ -4,7 +4,7 @@
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OKF](https://img.shields.io/badge/OKF-v0.3.1-green.svg)](https://cloud.google.com/knowledge-catalog)
+[![OKF](https://img.shields.io/badge/OKF-v0.3.1-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
 > **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. v0.3.1 introduces `HermesOKFMemoryProvider` — a native Hermes Agent plugin with `MemoryProvider` ABC integration.**
 
@@ -31,7 +31,7 @@ Hermes OKF gives your AI agent a **persistent, structured, version-controlled me
 
 [OKF (Open Knowledge Format)](https://cloud.google.com/blog/products/data-analytics/introducing-open-knowledge-format) is a **vendor-neutral, open specification** published by Google Cloud on June 12, 2026. It formalizes the "LLM wiki" pattern into a portable standard: every concept is a `.md` file with YAML frontmatter, and markdown links create a knowledge graph.
 
-> *"OKF is a vendor-neutral, agent- and human-friendly standard for representing the metadata, context, and curated knowledge that modern AI systems need."* — [Sam McVeety & Amir Hormati, Google Cloud](https://cloud.google.com/blog/products/data-analytics/introducing-open-knowledge-format)
+> *"OKF is a vendor-neutral, agent- and human-friendly standard for representing the metadata, context, and curated knowledge that modern AI systems need."* — [Sam McVeety & Amir Hormati, Google Cloud](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
 **Why hermes-okf chose OKF:**
 
@@ -43,7 +43,7 @@ Hermes OKF gives your AI agent a **persistent, structured, version-controlled me
 | **Human-readable** | `cat` any file and understand it. Git diffs work out of the box. |
 
 **References:**
-- [Google Cloud Blog: Introducing the Open Knowledge Format](https://cloud.google.com/blog/products/data-analytics/introducing-open-knowledge-format)
+- [Google Cloud Blog: Introducing the Open Knowledge Format](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 - [OKF Specification (GitHub)](https://github.com/GoogleCloudPlatform/knowledge-catalog)
 - [Google Cloud Knowledge Catalog](https://cloud.google.com/knowledge-catalog)
 

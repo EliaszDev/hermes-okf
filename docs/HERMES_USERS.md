@@ -310,7 +310,7 @@ hermes-okf --path ~/.hermes/okf_memory context "What did we decide?"
 
 - **hermes-okf**: [github.com/EliaszDev/hermes-okf](https://github.com/EliaszDev/hermes-okf)
 - **Hermes Agent**: [github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)
-- **Open Knowledge Format**: [cloud.google.com/knowledge-catalog](https://cloud.google.com/knowledge-catalog)
+- **Open Knowledge Format**: [cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
 ---
 

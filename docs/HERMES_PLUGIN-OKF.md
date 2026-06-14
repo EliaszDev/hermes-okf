@@ -349,4 +349,4 @@ Hermes-OKF doesn't replace Hermes' memory. It **architects the knowledge** that 
 - [`examples/full_agent.py`](../examples/full_agent.py) — Complete working example
 - [Hermes Agent Memory Docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory)
 - [Hermes Issue #346 — Structured Memory](https://github.com/NousResearch/hermes-agent/issues/346)
-- [Google OKF Spec](https://cloud.google.com/knowledge-catalog)
+- [Google OKF Spec](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
