@@ -27,20 +27,23 @@ from hermes_okf.hermes_integration import HermesOKFConfig, HermesOKFProvider
 
 # The Hermes MemoryProvider ABC interface (imported if available)
 try:
-    from agent.memory_provider import MemoryProvider  # type: ignore[import]
+    from agent.memory_provider import MemoryProvider as _HermesMemoryProvider
 except ImportError:
-    # Fallback ABC for when Hermes isn't installed (e.g., during testing)
     from abc import ABC, abstractmethod
 
-    class MemoryProvider(ABC):  # type: ignore[no-redef]
+    class _HermesMemoryProvider(ABC):  # type: ignore[no-redef]
         @abstractmethod
         def sync_turn(
-            self, *, messages: list[dict], tools: list[dict] | None, **kwargs: Any
-        ) -> dict:
+            self,
+            *,
+            messages: list[dict[str, Any]],
+            tools: list[dict[str, Any]] | None = None,
+            **kwargs: Any,
+        ) -> dict[str, Any]:
             raise NotImplementedError
 
         @abstractmethod
-        def prefetch(self, *, query: str, **kwargs: Any) -> list[dict]:
+        def prefetch(self, *, query: str, **kwargs: Any) -> list[dict[str, Any]]:
             raise NotImplementedError
 
         @abstractmethod
@@ -48,7 +51,7 @@ except ImportError:
             raise NotImplementedError
 
 
-class HermesOKFMemoryProvider(MemoryProvider):
+class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
     """Hermes Agent memory provider backed by OKF (Open Knowledge Format).
 
     Implements the Hermes MemoryProvider ABC as a standalone plugin.
@@ -65,14 +68,14 @@ class HermesOKFMemoryProvider(MemoryProvider):
         agent_id = kwargs.get("agent_id", "hermes-agent")
         auto_snapshot = kwargs.get("auto_snapshot", True)
         log_tool_calls = kwargs.get("log_tool_calls", True)
-        hot_buffer_max = kwargs.get("hot_buffer_max", 100)
+        hot_memory_max = kwargs.get("hot_memory_max", 50)
 
         self.config = HermesOKFConfig(
             bundle_path=bundle_path,
             agent_id=agent_id,
             auto_snapshot=auto_snapshot,
             log_tool_calls=log_tool_calls,
-            hot_buffer_max=hot_buffer_max,
+            hot_memory_max=hot_memory_max,
         )
         self.provider = HermesOKFProvider(self.config)
         self._session_active = False
@@ -82,10 +85,10 @@ class HermesOKFMemoryProvider(MemoryProvider):
     def sync_turn(
         self,
         *,
-        messages: list[dict],
-        tools: list[dict] | None = None,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
         **kwargs: Any,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Called on every Hermes turn. Stores messages and tool calls.
 
         Hermes calls this after each LLM interaction. We extract:
@@ -112,7 +115,7 @@ class HermesOKFMemoryProvider(MemoryProvider):
 
         return {"ok": True, "provider": "hermes-okf"}
 
-    def prefetch(self, *, query: str, **kwargs: Any) -> list[dict]:
+    def prefetch(self, *, query: str, **kwargs: Any) -> list[dict[str, Any]]:
         """Retrieve relevant memory context for a query.
 
         Hermes calls this before a turn to fetch relevant past context.
@@ -120,13 +123,20 @@ class HermesOKFMemoryProvider(MemoryProvider):
         """
         top_k = kwargs.get("top_k", 5)
         results = self.provider.search(query, top_k=top_k)
-        return [
-            {
-                "role": "system",
-                "content": f"[{r.type}] {r.title or r.path}: {r.body[:500]}",
-            }
-            for r in results
-        ]
+        context: list[dict[str, Any]] = []
+        for path, _score in results:
+            concept = self.provider.agent.memory.bundle.read_concept(path)
+            if concept is None:
+                continue
+            context.append(
+                {
+                    "role": "system",
+                    "content": (
+                        f"[{concept.type}] {concept.title or concept.id}: " f"{concept.body[:500]}"
+                    ),
+                }
+            )
+        return context
 
     def shutdown(self, **kwargs: Any) -> None:
         """Graceful shutdown. Flushes hot buffer and ends session."""
@@ -167,7 +177,9 @@ class HermesOKFMemoryProvider(MemoryProvider):
     # -- CLI extension --------------------------------------------------------
 
     @staticmethod
-    def register_cli(subparser: argparse._SubParsersAction) -> None:
+    def register_cli(
+        subparser: argparse._SubParsersAction[argparse.ArgumentParser],
+    ) -> None:
         """Register hermes-okf CLI subcommands under `hermes okf ...`."""
         okf_parser = subparser.add_parser("okf", help="Hermes OKF memory commands")
         okf_sub = okf_parser.add_subparsers(dest="okf_command")
