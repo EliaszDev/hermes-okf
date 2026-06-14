@@ -27,6 +27,28 @@ Hermes OKF gives your AI agent a **persistent, structured, version-controlled me
 
 ---
 
+## Why OKF?
+
+[OKF (Open Knowledge Format)](https://cloud.google.com/blog/products/data-analytics/introducing-open-knowledge-format) is a **vendor-neutral, open specification** published by Google Cloud on June 12, 2026. It formalizes the "LLM wiki" pattern into a portable standard: every concept is a `.md` file with YAML frontmatter, and markdown links create a knowledge graph.
+
+> *"OKF is a vendor-neutral, agent- and human-friendly standard for representing the metadata, context, and curated knowledge that modern AI systems need."* — [Sam McVeety & Amir Hormati, Google Cloud](https://cloud.google.com/blog/products/data-analytics/introducing-open-knowledge-format)
+
+**Why hermes-okf chose OKF:**
+
+| OKF Principle | What it means for agents |
+|---------------|--------------------------|
+| **Minimally opinionated** | Only one required field: `type`. Everything else is up to the producer. |
+| **Producer/consumer independence** | A human can write a bundle; an AI agent can read it. No lock-in. |
+| **Format, not platform** | No proprietary runtime, no SDK, no cloud required. Just markdown files. |
+| **Human-readable** | `cat` any file and understand it. Git diffs work out of the box. |
+
+**References:**
+- [Google Cloud Blog: Introducing the Open Knowledge Format](https://cloud.google.com/blog/products/data-analytics/introducing-open-knowledge-format)
+- [OKF Specification (GitHub)](https://github.com/GoogleCloudPlatform/knowledge-catalog)
+- [Google Cloud Knowledge Catalog](https://cloud.google.com/knowledge-catalog)
+
+---
+
 ## Quick Start
 
 ```bash
