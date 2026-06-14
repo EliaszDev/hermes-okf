@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from hermes_cli.plugins import PluginContext
 
 
-def register(ctx: "PluginContext") -> None:
+def register(ctx: PluginContext) -> None:
     """Register the ``hermes okf`` CLI command tree.
 
     Called by Hermes' ``PluginManager`` when the plugin is discovered
