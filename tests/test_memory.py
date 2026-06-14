@@ -31,27 +31,27 @@ class TestHermesMemory:
     def test_recall(self):
         with tempfile.TemporaryDirectory() as tmp:
             mem = HermesMemory(tmp, agent_id="test-agent")
-            mem.register_project("fifa", "FIFA Pipeline", "World Cup clips")
-            mem.record_decision("Use ffmpeg", tags=["fifa"])
-            results = mem.recall("ffmpeg")
+            mem.register_project("alpha", "Alpha Pipeline", "Data processing pipeline")
+            mem.record_decision("Use Python", tags=["alpha"])
+            results = mem.recall("Python")
             assert len(results) > 0
 
     def test_recall_by_tag(self):
         with tempfile.TemporaryDirectory() as tmp:
             mem = HermesMemory(tmp, agent_id="test-agent")
-            mem.register_project("fifa", "FIFA", tags=["fifa"])
-            mem.register_project("synapse", "Synapse", tags=["crypto"])
-            fifa = mem.recall_by_tag("fifa")
-            assert len(fifa) == 1
-            assert fifa[0].title == "FIFA"
+            mem.register_project("alpha", "Alpha", tags=["alpha"])
+            mem.register_project("beta", "Beta", tags=["beta"])
+            alpha = mem.recall_by_tag("alpha")
+            assert len(alpha) == 1
+            assert alpha[0].title == "Alpha"
 
     def test_recall_project(self):
         with tempfile.TemporaryDirectory() as tmp:
             mem = HermesMemory(tmp, agent_id="test-agent")
-            mem.register_project("fifa_pipeline", "FIFA Pipeline")
-            project = mem.recall_project("FIFA Pipeline")
+            mem.register_project("alpha_pipeline", "Alpha Pipeline")
+            project = mem.recall_project("Alpha Pipeline")
             assert project is not None
-            assert project.title == "FIFA Pipeline"
+            assert project.title == "Alpha Pipeline"
 
     def test_get_recent_log(self):
         with tempfile.TemporaryDirectory() as tmp:

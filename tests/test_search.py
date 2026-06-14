@@ -43,8 +43,8 @@ class TestSearchIndex:
                 "a",
                 body="A",
                 type="A",
-                title="FIFA World Cup Pipeline",
+                title="Machine Learning Pipeline",
             )
             index = SearchIndex(bundle)
-            results = index.fuzzy_search("fifa", threshold=0.5)
+            results = index.fuzzy_search("machine learning", threshold=0.5)
             assert any(r[0] == "a" for r in results)

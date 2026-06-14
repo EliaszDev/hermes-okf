@@ -5,16 +5,16 @@ bundle = OKFBundle("./my_knowledge")
 
 # Write a concept
 bundle.write_concept(
-    "projects/fifa_pipeline",
-    body="# FIFA World Cup Pipeline\n\nExtracts viral clips using ffmpeg and YOLOv8.",
+    "projects/my_project",
+    body="# My Project\n\nDescribe your project here.",
     type="Project",
-    title="FIFA World Cup Clip Pipeline",
-    tags=["fifa", "ffmpeg", "yolo", "gpu"],
-    resource="https://github.com/EliaszDev/fifa-pipeline",
+    title="My Project",
+    tags=["ml", "data", "gpu"],
+    resource="https://github.com/YOUR_USERNAME/my-project",
 )
 
 # Read it back
-concept = bundle.read_concept("projects/fifa_pipeline")
+concept = bundle.read_concept("projects/my_project")
 print(f"Title: {concept.title}")
 print(f"Tags: {concept.tags}")
 

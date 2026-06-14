@@ -31,19 +31,19 @@ class TestReadWrite:
         with tempfile.TemporaryDirectory() as tmp:
             bundle = OKFBundle(tmp)
             concept = bundle.write_concept(
-                "projects/fifa_pipeline",
-                body="# FIFA Pipeline\n\nExtracts World Cup clips.",
+                "projects/my_project",
+                body="# My Project\n\nA sample project description.",
                 type="Project",
-                title="FIFA Pipeline",
-                tags=["fifa", "ffmpeg"],
+                title="My Project",
+                tags=["ml", "data"],
             )
             assert isinstance(concept, Concept)
             assert concept.type == "Project"
 
-            retrieved = bundle.read_concept("projects/fifa_pipeline")
+            retrieved = bundle.read_concept("projects/my_project")
             assert retrieved is not None
-            assert retrieved.title == "FIFA Pipeline"
-            assert "ffmpeg" in retrieved.tags
+            assert retrieved.title == "My Project"
+            assert "data" in retrieved.tags
             assert retrieved.timestamp is not None
 
     def test_read_missing_concept_returns_none(self):

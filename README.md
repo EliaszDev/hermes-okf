@@ -38,16 +38,16 @@ bundle = OKFBundle("./my_knowledge")
 
 # Store a project concept
 bundle.write_concept(
-    "projects/fifa_pipeline",
-    body="# FIFA Pipeline\n\nExtracts viral clips using ffmpeg and YOLOv8.",
+    "projects/my_project",
+    body="# My Project\n\nDescribe your project here.",
     type="Project",
-    title="FIFA World Cup Clip Pipeline",
-    tags=["fifa", "ffmpeg", "yolo", "gpu"],
-    resource="https://github.com/EliaszDev/fifa-pipeline",
+    title="My Project",
+    tags=["ml", "data", "gpu"],
+    resource="https://github.com/YOUR_USERNAME/my-project",
 )
 
 # Log a decision
-bundle.append_log("Dropped PyTorch due to ROCm issues on RX 5500 XT", category="Decision")
+bundle.append_log("Switched from TensorFlow to PyTorch for better ecosystem support", category="Decision")
 
 # Search by tag
 for concept in bundle.search_by_tag("gpu"):
@@ -104,7 +104,7 @@ hermes-okf validate --path ./knowledge
 hermes-okf list --path ./knowledge
 
 # Show a concept
-hermes-okf show --path ./knowledge projects/fifa_pipeline
+hermes-okf show --path ./knowledge projects/my_project
 
 # Search
 hermes-okf search --path ./knowledge "ffmpeg GPU"
@@ -117,7 +117,7 @@ hermes-okf log-append --path ./knowledge "New decision made" --category Decision
 
 # Graph inspection
 hermes-okf graph-edges --path ./knowledge
-hermes-okf graph-neighbors --path ./knowledge projects/fifa_pipeline
+hermes-okf graph-neighbors --path ./knowledge projects/my_project
 ```
 
 ---

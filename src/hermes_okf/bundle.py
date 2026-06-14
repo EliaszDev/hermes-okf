@@ -111,7 +111,7 @@ class OKFBundle:
         """Write or overwrite a concept. Auto-adds timestamp if missing.
 
         Args:
-            concept_id: Relative path without ``.md`` (e.g. ``projects/fifa_pipeline``).
+            concept_id: Relative path without ``.md`` (e.g. ``projects/my_project``).
             body: Markdown body content.
             **frontmatter: Arbitrary YAML frontmatter fields. ``type`` is required
                 by OKF spec but not enforced here (use ``OKFValidator`` for that).

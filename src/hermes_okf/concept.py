@@ -13,7 +13,7 @@ class Concept:
     Corresponds to one ``.md`` file with YAML frontmatter + markdown body.
 
     Attributes:
-        id: Relative path without ``.md`` (e.g. ``projects/fifa_pipeline``).
+        id: Relative path without ``.md`` (e.g. ``projects/my_project``).
         type: OKF ``type`` field (e.g. ``Project``, ``Decision``, ``Metric``).
         title: Human-readable title.
         description: Short summary (optional).
