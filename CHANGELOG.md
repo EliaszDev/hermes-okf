@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-14
+
+### Added
+- `HermesOKFProvider` — generic Hermes-native memory provider for **any** Nous Research Hermes agent
+- Two-memory model: Hot buffer (in-process) + Cold archive (OKF bundle) with automatic flushing
+- Hermes config system integration — reads from `~/.hermes/hermes-okf.yaml` or env vars (`HERMES_OKF_*`)
+- Lifecycle hooks: `on_session_start`, `on_memory_write`, `on_tool_call`, `on_decision`, `on_plan_complete`, `on_session_end`
+- Tool registry — auto-registers Hermes tool schemas as typed OKF concepts
+- Plan tracking — Hermes plan steps automatically persisted to OKF
+- RAG layer — optional ChromaDB vector search over the OKF bundle (LangChain)
+- Crash recovery — `snapshot()` and `restore()` from the provider level
+- `docs/HERMES_USERS.md` — user guide for any Hermes agent owner
+- `tests/test_hermes_integration.py` — 7 test cases covering all provider features
+
+### Changed
+- `HermesAgent` constructor now creates `hermes/` directory structure automatically
+- All pipeline-specific references removed — integration is now generic
+- Hermes tool decorators (`@memorize_tool`, `@memorize_decision`) now store in `tool_schema.md` + `tool_call_*.md`
+
 ## [0.2.0] - 2026-06-15
 
 ### Added
