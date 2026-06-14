@@ -65,6 +65,9 @@ all = [
 [project.scripts]
 hermes-okf = "hermes_okf.cli:main"
 
+[project.entry-points."hermes.memory_providers"]
+hermes-okf = "hermes_okf.memory_plugin:HermesOKFMemoryProvider"
+
 [project.urls]
 Homepage = "https://github.com/EliaszDev/hermes-okf"
 Documentation = "https://github.com/EliaszDev/hermes-okf#readme"
