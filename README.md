@@ -4,7 +4,7 @@
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OKF](https://img.shields.io/badge/OKF-v0.1-green.svg)](https://cloud.google.com/knowledge-catalog)
+[![OKF](https://img.shields.io/badge/OKF-v0.3.0-green.svg)](https://cloud.google.com/knowledge-catalog)
 
 > **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. **v0.3.0 introduces `HermesOKFProvider` — a universal memory provider that works with any Nous Research Hermes agent.****
 
