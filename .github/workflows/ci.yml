@@ -57,4 +57,4 @@ jobs:
       - name: Init and validate example bundle
         run: |
           hermes-okf init examples/example_bundle
-          hermes-okf validate --path examples/example_bundle
+          hermes-okf --path examples/example_bundle validate
