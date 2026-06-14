@@ -1,4 +1,4 @@
-# Hermes OKF (Open Knowlege Format) — Universal Memory for AI Agents
+# Hermes OKF (Open knowledge Format) — Universal Memory for AI Agents
 
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
