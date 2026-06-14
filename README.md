@@ -4,9 +4,9 @@
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OKF](https://img.shields.io/badge/OKF-v0.3.0-green.svg)](https://cloud.google.com/knowledge-catalog)
+[![OKF](https://img.shields.io/badge/OKF-v0.3.1-green.svg)](https://cloud.google.com/knowledge-catalog)
 
-> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. **v0.3.0 introduces `HermesOKFProvider` — a universal memory provider that works with any Nous Research Hermes agent.****
+> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. v0.3.1 introduces `HermesOKFMemoryProvider` — a native Hermes Agent plugin with `MemoryProvider` ABC integration.**
 
 Hermes OKF gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem. Every decision, observation, and project context lives in a human-readable knowledge graph that your agent can read, write, and traverse programmatically.
 
