@@ -69,7 +69,7 @@ hermes-okf = "hermes_okf.cli:main"
 hermes-okf = "hermes_okf.memory_plugin:HermesOKFMemoryProvider"
 
 [project.entry-points."hermes_agent.plugins"]
-hermes-okf = "hermes_okf.plugin:register"
+hermes-okf = "hermes_okf.plugin"
 
 [project.urls]
 Homepage = "https://github.com/EliaszDev/hermes-okf"
