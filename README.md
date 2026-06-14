@@ -60,11 +60,17 @@ pip install hermes-okf
 Add to `~/.hermes/config.yaml`:
 
 ```yaml
+plugins:
+  enabled:
+    - hermes-okf
+
 memory:
   provider: hermes-okf
   bundle_path: ~/.hermes/okf_memory
   agent_id: hermes-alpha
 ```
+
+> **Important:** `plugins.enabled` must be a YAML list, not a string. If you use `hermes config set plugins.enabled '["hermes-okf"]'`, it stores a JSON string which Hermes ignores. Edit `~/.hermes/config.yaml` directly to ensure it's a proper list.
 
 Run the setup wizard:
 
