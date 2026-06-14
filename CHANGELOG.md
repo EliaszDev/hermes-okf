@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-06-14
+
+### Added
+- `HermesOKFMemoryProvider` — Hermes Agent `MemoryProvider` ABC plugin adapter
+- Implements `sync_turn()`, `prefetch()`, `shutdown()`, `post_setup()` for native Hermes integration
+- `register_cli()` — adds `hermes okf search/list/snapshot/restore` CLI extension
+- Pip entry point: `hermes.memory_providers` for auto-discovery by Hermes Agent
+- Aligns with Hermes CONTRIBUTING.md policy: standalone memory plugins, no core changes needed
+
+### Fixed
+- `memory_plugin.py` type annotations — `dict[str, Any]`, `hot_memory_max`, `Concept.id`
+- All 46 tests pass, ruff/black/mypy clean
+
 ## [0.3.0] - 2026-06-14
 
 ### Added
