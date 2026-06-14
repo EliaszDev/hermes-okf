@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 2026-06-14
+
+### Fixed
+- Entry point format corrected — `hermes_agent.plugins` must be **module-only** (`hermes_okf.plugin`), not `hermes_okf.plugin:register`. The `:register` suffix caused `ep.load()` to return the function object instead of the module, so Hermes couldn't find `register()` and skipped the plugin with "no register() function"
+- The published 0.3.2 wheel had the broken entry point; 0.3.3 is a clean rebuild
+
 ## [0.3.2] - 2026-06-14
 
 ### Fixed
