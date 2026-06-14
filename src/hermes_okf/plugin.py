@@ -10,7 +10,8 @@ Instead, they register CLI commands through the general plugin
 ``register(ctx)`` hook using ``ctx.register_cli_command()``.
 
 Reference:
-    https://github.com/NousResearch/hermes-agent/blob/main/website/docs/guides/build-a-hermes-plugin.md
+    https://github.com/NousResearch/hermes-agent/blob/main/
+    website/docs/guides/build-a-hermes-plugin.md
 """
 
 from __future__ import annotations

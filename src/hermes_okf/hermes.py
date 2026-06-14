@@ -82,7 +82,10 @@ class HermesAgent(HermesMemoryMixin):
         self.memory.start_session(self.current_session_id)
         self.memory.bundle.write_concept(
             f"sessions/{self.current_session_id}",
-            body=f"# Session {self.current_session_id}\n\nAgent: {self.memory.agent_id}\nModel: {self.model}",
+            body=(
+                f"# Session {self.current_session_id}\n\n"
+                f"Agent: {self.memory.agent_id}\nModel: {self.model}"
+            ),
             type="Session",
             title=f"Session {self.current_session_id}",
             agent_id=self.memory.agent_id,
