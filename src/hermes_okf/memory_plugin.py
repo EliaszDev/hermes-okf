@@ -188,16 +188,76 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
         search_parser = okf_sub.add_parser("search", help="Search OKF memory")
         search_parser.add_argument("query", help="Search query")
         search_parser.add_argument("--top-k", type=int, default=5)
+        search_parser.set_defaults(func=_cli_search)
 
         # hermes okf list
         list_parser = okf_sub.add_parser("list", help="List OKF concepts")
         list_parser.add_argument("--type", help="Filter by type")
+        list_parser.set_defaults(func=_cli_list)
 
         # hermes okf snapshot
-        okf_sub.add_parser("snapshot", help="Save memory snapshot")
+        snapshot_parser = okf_sub.add_parser("snapshot", help="Save memory snapshot")
+        snapshot_parser.add_argument("--note", default="", help="Snapshot note")
+        snapshot_parser.set_defaults(func=_cli_snapshot)
 
         # hermes okf restore
-        okf_sub.add_parser("restore", help="Restore from last snapshot")
+        restore_parser = okf_sub.add_parser("restore", help="Restore from last snapshot")
+        restore_parser.set_defaults(func=_cli_restore)
+
+
+# -- CLI handlers ------------------------------------------------------------
+
+
+def _cli_search(args: argparse.Namespace) -> None:
+    """Handle `hermes okf search <query>`."""
+    from hermes_okf import HermesOKFProvider
+
+    provider = HermesOKFProvider()
+    results = provider.search(args.query, top_k=args.top_k)
+    if not results:
+        print("No results found.")
+        return
+    for path, score in results:
+        print(f"  [{score:.2f}] {path}")
+
+
+def _cli_list(args: argparse.Namespace) -> None:
+    """Handle `hermes okf list`."""
+    from hermes_okf import HermesOKFProvider
+
+    provider = HermesOKFProvider()
+    paths = provider.agent.memory.bundle.list_concepts(subdir=None)
+    if not paths:
+        print("No concepts found.")
+        return
+    for path in paths:
+        concept = provider.agent.memory.bundle.read_concept(path)
+        if concept is None:
+            continue
+        if args.type and concept.type != args.type:
+            continue
+        print(f"  [{concept.type}] {concept.id}")
+
+
+def _cli_snapshot(args: argparse.Namespace) -> None:
+    """Handle `hermes okf snapshot`."""
+    from hermes_okf import HermesOKFProvider
+
+    provider = HermesOKFProvider()
+    provider.snapshot(note=args.note)
+    print("✓ Snapshot saved.")
+
+
+def _cli_restore(args: argparse.Namespace) -> None:
+    """Handle `hermes okf restore`."""
+    from hermes_okf import HermesOKFProvider
+
+    provider = HermesOKFProvider()
+    state = provider.restore()
+    if state:
+        print(f"✓ Restored from: {state.get('timestamp', 'unknown')}")
+    else:
+        print("No snapshots found.")
 
 
 # -- Entry point for Hermes discovery ----------------------------------------
