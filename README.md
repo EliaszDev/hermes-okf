@@ -1,11 +1,12 @@
 # Hermes OKF (Open Knowledge Format) — Universal Memory for AI Agents
 
+[![PyPI](https://img.shields.io/pypi/v/hermes-okf.svg)](https://pypi.org/project/hermes-okf/)
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OKF](https://img.shields.io/badge/OKF-v0.1-green.svg)](https://cloud.google.com/knowledge-catalog)
 
-> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem.**
+> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. **v0.3.0 introduces `HermesOKFProvider` — a universal memory provider that works with any Nous Research Hermes agent.****
 
 Hermes OKF gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem. Every decision, observation, and project context lives in a human-readable knowledge graph that your agent can read, write, and traverse programmatically.
 
@@ -22,6 +23,7 @@ Hermes OKF gives your AI agent a **persistent, structured, version-controlled me
 | 🎁 **Hermes-Ready** | Drop-in decorators: `@memorize_decision`, `@memorize_tool` |
 | 🔄 **Resume** | Stop and restart — the agent restores from its OKF bundle |
 | 📦 **Portable** | Clone a bundle to another machine — the agent resumes instantly. |
+| 🔌 **Universal Provider** | `HermesOKFProvider` works with **any** Nous Research Hermes agent |
 
 ---
 
@@ -32,36 +34,28 @@ pip install hermes-okf
 ```
 
 ```python
-from hermes_okf.bundle import OKFBundle
+from hermes_okf import HermesOKFProvider
 
-# Create a knowledge bundle
-bundle = OKFBundle("./my_knowledge")
+# Create a universal Hermes memory provider
+provider = HermesOKFProvider()
 
-# Store a project concept
-bundle.write_concept(
-    "projects/my_project",
-    body="# My Project\n\nDescribe your project here.",
-    type="Project",
-    title="My Project",
-    tags=["ml", "data", "gpu"],
-    resource="https://github.com/YOUR_USERNAME/my-project",
-)
+# Start a session
+provider.on_session_start("session-1")
 
-# Log a decision
-bundle.append_log("Switched from TensorFlow to PyTorch for better ecosystem support", category="Decision")
+# Store memories
+provider.on_memory_write("user", "User prefers dark mode")
+provider.on_tool_call("search_web", {"query": "Python"}, "Found 5 results")
+provider.on_decision("Use Claude", "Better reasoning", tags=["model"])
 
-# Search by tag
-for concept in bundle.search_by_tag("gpu"):
-    print(concept.title)
-
-# Inspect the graph
-for edge in bundle.get_graph_edges():
-    print(f"{edge['source']} -> {edge['target']}")
+# End session — flushes to OKF bundle
+provider.on_session_end("session-1")
 ```
 
 ---
 
 ## Agent Integration (Memory Mixin)
+
+> **New in v0.3.0:** For most Hermes users, the [`HermesOKFProvider`](#quick-start) is the recommended approach. The decorators below are for advanced use cases or custom agent classes.
 
 ```python
 from hermes_okf.agent import HermesMemoryMixin
@@ -136,6 +130,8 @@ hermes_agent_brain/
 ```
 
 Read the full integration guide: [`docs/HERMES_INTEGRATION.md`](docs/HERMES_INTEGRATION.md)
+
+For the universal provider usage, see: [`docs/HERMES_USERS.md`](docs/HERMES_USERS.md)
 
 ---
 
@@ -221,7 +217,8 @@ See `examples/rag_integration.py` for a complete example.
 ┌─────────────────────────────────────┐
 │  CLI (hermes-okf)                   │
 ├─────────────────────────────────────┤
-│  HermesMemory / MemoryMixin         │  ← Agent integration
+│  HermesOKFProvider                  │  ← Universal Hermes provider (v0.3.0)
+│  HermesAgent / MemoryMixin          │  ← Agent integration
 ├─────────────────────────────────────┤
 │  OKFBundle                          │  ← Core read/write API
 │  ├── Concept (dataclass)            │
@@ -264,6 +261,8 @@ hermes-okf/
 │   ├── validators.py         # OKF conformance checking
 │   ├── memory.py             # Agent memory layer
 │   ├── agent.py              # Drop-in decorators
+│   ├── hermes.py             # HermesAgent full-state bundle
+│   ├── hermes_integration.py # Universal HermesOKFProvider (v0.3.0)
 │   └── cli.py                # CLI entry point
 ├── tests/                    # pytest suite
 ├── examples/                 # Usage examples
@@ -288,6 +287,9 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full guidelines.
 
 ## Roadmap
 
+- [x] **Universal Hermes memory provider** (`HermesOKFProvider`) — any Hermes agent can use it
+- [x] Two-memory model (hot buffer + cold OKF archive) with automatic flushing
+- [x] Hermes config system integration (`~/.hermes/hermes-okf.yaml`)
 - [ ] Async I/O support for high-throughput agents
 - [ ] Multi-agent bundle merging and conflict resolution
 - [ ] Git-backed history with automatic diff summaries
