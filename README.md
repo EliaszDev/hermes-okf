@@ -4,9 +4,9 @@
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OKF](https://img.shields.io/badge/OKF-v0.3.6-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
+[![OKF](https://img.shields.io/badge/OKF-v0.3.7-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
-> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. v0.3.6 fixes CI black formatting and publishes a clean wheel. `HermesOKFMemoryProvider` — a native Hermes Agent plugin with `MemoryProvider` ABC integration. `pip install hermes-okf` and Hermes auto-discovers it. `hermes okf search|list|show|snapshot|restore` CLI commands work out of the box.**
+> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. v0.3.7 syncs the OKF config concept with the actual Hermes model from `config.yaml`. `HermesOKFMemoryProvider` — a native Hermes Agent plugin with `MemoryProvider` ABC integration. `pip install hermes-okf` and Hermes auto-discovers it. `hermes okf search|list|show|snapshot|restore` CLI commands work out of the box.**
 
 Hermes OKF gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem. Every decision, observation, and project context lives in a human-readable knowledge graph that your agent can read, write, and traverse programmatically.
 

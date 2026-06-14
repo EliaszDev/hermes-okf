@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.7] - 2026-06-14
+
+### Fixed
+- `HermesOKFMemoryProvider.initialize()` now reads the actual Hermes model from `config.yaml` (top-level `model` or `llm.model`) and syncs it into the OKF `config/agent` concept. Previously the config concept was hardcoded with `openai/gpt-4o` regardless of the actual model.
+
 ## [0.3.6] - 2026-06-14
 
 ### Fixed

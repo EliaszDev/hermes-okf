@@ -9,6 +9,7 @@ Reference: https://github.com/NousResearch/hermes-agent/blob/main/agent/memory_p
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -85,6 +86,7 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
 
         # Load config from Hermes config.yaml if it exists
         config_kwargs: dict[str, Any] = {}
+        hermes_model = ""
         if config_path.exists():
             import yaml
 
@@ -98,13 +100,33 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
             config_kwargs["auto_snapshot"] = memory_cfg.get("auto_snapshot", True)
             config_kwargs["log_tool_calls"] = memory_cfg.get("log_tool_calls", True)
             config_kwargs["hot_memory_max"] = memory_cfg.get("hot_memory_max", 50)
+            # Read the actual Hermes model (top-level or under llm)
+            hermes_model = hermes_config.get(
+                "model",
+                hermes_config.get("llm", {}).get("model", ""),
+            )
         else:
             config_kwargs["bundle_path"] = str(hermes_home_path / "okf_memory")
             config_kwargs["agent_id"] = "hermes-agent"
 
         config = HermesOKFConfig(**config_kwargs)
+        if hermes_model:
+            config.model = hermes_model
         self._provider = HermesOKFProvider(config)
         self._provider.on_session_start(session_id)
+
+        # Sync the OKF config concept with the actual Hermes model
+        if hermes_model:
+            self._provider.agent.memory.bundle.write_concept(
+                "config/agent",
+                body="# Agent Configuration\n\nSystem prompt and behaviour settings.",
+                type="AgentConfig",
+                title=f"{config.agent_id} Configuration",
+                model=hermes_model,
+                system_prompt="You are a helpful, autonomous Hermes agent.",
+                version=hermes_okf.__version__,
+                timestamp=datetime.now(timezone.utc).isoformat() + "Z",
+            )
 
     def get_tool_schemas(self) -> list[dict[str, Any]]:
         """Return tool schemas for memory operations.
