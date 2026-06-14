@@ -182,12 +182,79 @@ def main(argv: list[str] | None = None) -> int:
     neighbors_parser.add_argument("concept_id", help="Concept ID")
     neighbors_parser.set_defaults(func=_graph_neighbors)
 
+    # agent snapshot
+    snap_parser = subparsers.add_parser("snapshot", help="Save agent state snapshot")
+    snap_parser.add_argument("--note", default="", help="Snapshot note")
+    snap_parser.set_defaults(func=_snapshot)
+
+    # agent context
+    ctx_parser = subparsers.add_parser("context", help="Build LLM context from bundle")
+    ctx_parser.add_argument("query", help="Query to build context around")
+    ctx_parser.add_argument("--top-k", type=int, default=5, help="Relevant concepts to include")
+    ctx_parser.add_argument("--agent-id", default="hermes", help="Agent ID")
+    ctx_parser.set_defaults(func=_context)
+
+    # sessions
+    sess_parser = subparsers.add_parser("sessions", help="List agent sessions")
+    sess_parser.set_defaults(func=_sessions)
+
+    # plans
+    plan_parser = subparsers.add_parser("plans", help="List agent plans")
+    plan_parser.set_defaults(func=_plans)
+
+    # tools
+    tools_parser = subparsers.add_parser("tools", help="List registered tools")
+    tools_parser.set_defaults(func=_tools)
+
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
         return 0
 
     return args.func(args)
+
+
+def _snapshot(args: argparse.Namespace) -> int:
+    from hermes_okf.hermes import HermesAgent
+    agent = HermesAgent(args.path, args.agent_id)
+    agent.snapshot(note=args.note)
+    print("Snapshot saved.")
+    return 0
+
+
+def _context(args: argparse.Namespace) -> int:
+    from hermes_okf.hermes import HermesAgent
+    agent = HermesAgent(args.path, args.agent_id)
+    ctx = agent.build_context(args.query, top_k=args.top_k)
+    print(ctx)
+    return 0
+
+
+def _sessions(args: argparse.Namespace) -> int:
+    from hermes_okf.hermes import HermesAgent
+    agent = HermesAgent(args.path, "hermes")
+    for sid in agent.list_sessions():
+        print(sid)
+    return 0
+
+
+def _plans(args: argparse.Namespace) -> int:
+    bundle = OKFBundle(args.path)
+    plans = bundle.list_concepts("plans")
+    if not plans:
+        print("No active plans.")
+        return 0
+    for p in plans:
+        print(p)
+    return 0
+
+
+def _tools(args: argparse.Namespace) -> int:
+    from hermes_okf.hermes import HermesAgent
+    agent = HermesAgent(args.path, "hermes")
+    for t in agent.list_tools():
+        print(t)
+    return 0
 
 
 if __name__ == "__main__":

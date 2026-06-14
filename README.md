@@ -20,6 +20,7 @@ Hermes OKF gives your AI agent a **persistent, structured, version-controlled me
 | 📁 **Filesystem-First** | Plain `.md` + YAML. `cat` it, `grep` it, Git it. |
 | ⚡ **Zero-DB Core** | Single dependency: `pyyaml`. Optional RAG via LangChain/ChromaDB. |
 | 🎁 **Hermes-Ready** | Drop-in decorators: `@memorize_decision`, `@memorize_tool` |
+| 🔄 **Resume** | Stop and restart — the agent restores from its OKF bundle |
 | 📦 **Portable** | Clone a bundle to another machine — the agent resumes instantly. |
 
 ---
@@ -88,6 +89,53 @@ agent.scrape_data("https://example.com")
 # Recall relevant context
 context = agent.with_context("python script", top_k=3)
 ```
+
+---
+
+## Full Hermes Agent (State as OKF Bundle)
+
+For deeper integration, use `HermesAgent` — the entire agent state lives in the OKF bundle. The agent can be stopped, restarted, and resumed from its bundle alone.
+
+```python
+from hermes_okf import HermesAgent
+
+# Create or resume an agent
+agent = HermesAgent(
+    bundle_path="./hermes_agent_brain",
+    agent_id="hermes-alpha",
+    model="anthropic/claude-3.5-sonnet",
+)
+
+# Register tools with JSON schemas
+agent.register_tool("search_web", "Search the web", schema={"type": "object", ...})
+
+# Create and execute plans
+agent.create_plan("Research AI trends", ["Search", "Summarize", "Report"])
+agent.complete_step(0, result="Found 5 major trends")
+
+# Build LLM context automatically
+context = agent.build_context("What should I do next?")
+
+# Save snapshot — resume later from this exact state
+agent.snapshot()
+
+agent.end_session()
+```
+
+The agent bundle structure:
+```
+hermes_agent_brain/
+├── config/agent.md        # Identity, model, system prompt
+├── tools/*.md             # Tool definitions with schemas
+├── sessions/*.md          # Session records
+├── plans/*.md             # Active plans with checkable steps
+├── plans/archive/*.md     # Completed plans
+├── decisions/*.md         # Strategic decisions
+├── snapshots/*.md         # Full state snapshots
+└── index.md / log.md      # Bundle overview and activity log
+```
+
+Read the full integration guide: [`docs/HERMES_INTEGRATION.md`](docs/HERMES_INTEGRATION.md)
 
 ---
 
