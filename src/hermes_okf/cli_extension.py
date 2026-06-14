@@ -102,7 +102,7 @@ def _cli_show(args: argparse.Namespace) -> None:
         return
 
     if args.raw:
-        print(concept.content)
+        print(concept.body)
     else:
         print(f"\n[{concept.type}] {concept.id}")
         if concept.metadata:
@@ -110,7 +110,7 @@ def _cli_show(args: argparse.Namespace) -> None:
             for k, v in concept.metadata.items():
                 print(f"  {k}: {v}")
         print("---")
-        print(concept.content)
+        print(concept.body)
 
 
 def _cli_snapshot(args: argparse.Namespace) -> None:
