@@ -57,7 +57,7 @@ Metadata:
   title: hermes Configuration
   model: kimi/k2.6
   system_prompt: You are a helpful, autonomous Hermes agent.
-  version: 0.4.4
+  version: 0.4.5
   timestamp: 2026-06-14T22:14:58Z
 ---
 # Agent Configuration

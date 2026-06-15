@@ -17,7 +17,7 @@ from hermes_okf.validators import OKFValidator
 
 
 def _init_bundle(args: argparse.Namespace) -> int:
-    path = Path(args.path).expanduser().resolve()
+    path = Path(args.init_path or args.path).expanduser().resolve()
     if path.exists() and any(path.iterdir()) and not args.force:
         print(f"Error: Directory '{path}' is not empty. Use --force to overwrite.")
         return 1
@@ -141,6 +141,53 @@ def _uninstall_plugin(args: argparse.Namespace) -> int:
     return 0
 
 
+def _snapshot(args: argparse.Namespace) -> int:
+    from hermes_okf.hermes import HermesAgent
+
+    agent = HermesAgent(args.path, args.agent_id)
+    agent.snapshot(note=args.note)
+    print("Snapshot saved.")
+    return 0
+
+
+def _context(args: argparse.Namespace) -> int:
+    from hermes_okf.hermes import HermesAgent
+
+    agent = HermesAgent(args.path, args.agent_id)
+    ctx = agent.build_context(args.query, top_k=args.top_k)
+    print(ctx)
+    return 0
+
+
+def _sessions(args: argparse.Namespace) -> int:
+    from hermes_okf.hermes import HermesAgent
+
+    agent = HermesAgent(args.path, "hermes")
+    for sid in agent.list_sessions():
+        print(sid)
+    return 0
+
+
+def _plans(args: argparse.Namespace) -> int:
+    bundle = OKFBundle(args.path)
+    plans = bundle.list_concepts("plans")
+    if not plans:
+        print("No active plans.")
+        return 0
+    for p in plans:
+        print(p)
+    return 0
+
+
+def _tools(args: argparse.Namespace) -> int:
+    from hermes_okf.hermes import HermesAgent
+
+    agent = HermesAgent(args.path, "hermes")
+    for t in agent.list_tools():
+        print(t)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="hermes-okf",
@@ -151,7 +198,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # init
     init_parser = subparsers.add_parser("init", help="Initialise a new OKF bundle")
-    init_parser.add_argument("path", nargs="?", default=".", help="Bundle path")
+    init_parser.add_argument("init_path", nargs="?", default=None, help="Bundle path")
     init_parser.add_argument("--force", action="store_true", help="Overwrite non-empty dir")
     init_parser.set_defaults(func=_init_bundle)
 
@@ -210,6 +257,7 @@ def main(argv: list[str] | None = None) -> int:
     # agent snapshot
     snap_parser = subparsers.add_parser("snapshot", help="Save agent state snapshot")
     snap_parser.add_argument("--note", default="", help="Snapshot note")
+    snap_parser.add_argument("--agent-id", default="hermes", help="Agent ID")
     snap_parser.set_defaults(func=_snapshot)
 
     # agent context
@@ -237,53 +285,6 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     return int(args.func(args))
-
-
-def _snapshot(args: argparse.Namespace) -> int:
-    from hermes_okf.hermes import HermesAgent
-
-    agent = HermesAgent(args.path, args.agent_id)
-    agent.snapshot(note=args.note)
-    print("Snapshot saved.")
-    return 0
-
-
-def _context(args: argparse.Namespace) -> int:
-    from hermes_okf.hermes import HermesAgent
-
-    agent = HermesAgent(args.path, args.agent_id)
-    ctx = agent.build_context(args.query, top_k=args.top_k)
-    print(ctx)
-    return 0
-
-
-def _sessions(args: argparse.Namespace) -> int:
-    from hermes_okf.hermes import HermesAgent
-
-    agent = HermesAgent(args.path, "hermes")
-    for sid in agent.list_sessions():
-        print(sid)
-    return 0
-
-
-def _plans(args: argparse.Namespace) -> int:
-    bundle = OKFBundle(args.path)
-    plans = bundle.list_concepts("plans")
-    if not plans:
-        print("No active plans.")
-        return 0
-    for p in plans:
-        print(p)
-    return 0
-
-
-def _tools(args: argparse.Namespace) -> int:
-    from hermes_okf.hermes import HermesAgent
-
-    agent = HermesAgent(args.path, "hermes")
-    for t in agent.list_tools():
-        print(t)
-    return 0
 
 
 if __name__ == "__main__":

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.5] - 2026-06-15
+
+### Fixed
+- `hermes-okf init --path <dir>` now correctly uses the `--path` argument instead of checking the current working directory. The `init` subparser's positional `path` argument was renamed to `init_path` to avoid argparse shadowing the parent parser's `--path`.
+- `hermes-okf snapshot` now accepts `--agent-id` (was missing, causing `AttributeError` on the `agent_id` attribute).
+- Moved all CLI handler functions before `main()` for cleaner code structure.
+
 ## [0.4.4] - 2026-06-15
 
 ### Fixed

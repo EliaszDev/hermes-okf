@@ -24,7 +24,7 @@ Hermes' default memory is **small, hot, and curated** — two flat text files (`
 
 ---
 
-## Installation (v0.4.4+)
+## Installation (v0.4.5+)
 
 ### 1. Install hermes-okf
 
