@@ -370,19 +370,27 @@ pip install --upgrade hermes-okf
 
 ## Roadmap
 
-- [x] **Hermes plugin** (`HermesOKFMemoryProvider`) — MemoryProvider ABC, `hermes memory setup` integration
-- [x] **Plugin installer** (`hermes-okf-install`) — one-command registration in `~/.hermes/plugins/`
-- [x] **Universal Hermes memory provider** (`HermesOKFProvider`) — any Hermes agent can use it
-- [x] Two-memory model (hot buffer + cold OKF archive) with automatic flushing
-- [x] Hermes config system integration (`~/.hermes/hermes-okf.yaml`)
-- [x] Model sync — OKF config concept auto-updates from Hermes `config.yaml`
-- [x] `show` command — inspect any concept with metadata
-- [ ] Async I/O support for high-throughput agents
-- [ ] Multi-agent bundle merging and conflict resolution
-- [ ] Git-backed history with automatic diff summaries
-- [ ] Web viewer for knowledge graph exploration
-- [ ] Plugin system for custom concept types and validators
-- [ ] Integration with Hermes agent orchestration layer
+| # | Feature | Status | Priority | Notes |
+|---|---------|--------|----------|-------|
+| 1 | **Hermes plugin** (`HermesOKFMemoryProvider`) | ✅ Shipped | P0 | Full `MemoryProvider` ABC; `hermes memory setup` integration |
+| 2 | **Plugin installer** (`hermes-okf-install`) | ✅ Shipped | P0 | One-command registration in `~/.hermes/plugins/` |
+| 3 | **Universal provider** (`HermesOKFProvider`) | ✅ Shipped | P0 | Any Hermes agent can use it out of the box |
+| 4 | **Two-memory model** (hot + cold archive) | ✅ Shipped | P0 | Automatic flushing from hot buffer to OKF bundle |
+| 5 | **Model sync** | ✅ Shipped | P0 | OKF config auto-updates from Hermes `config.yaml` |
+| 6 | **Concept inspector** (`show` command) | ✅ Shipped | P0 | Inspect any concept with metadata + body |
+| 7 | **CI/CD gating** | ✅ Shipped | P0 | Tests must pass before PyPI publish; skip duplicates |
+| 8 | **Async I/O** | 🚧 Not started | P2 | All file ops are sync today. Needed for high-throughput agents. |
+| 9 | **Git-backed history** | 🚧 Not started | P1 | Bundle is markdown files — `git init` works manually. No programmatic diff/rollback yet. |
+| 10 | **Web viewer** | 🚧 Not started | P1 | CLI-only today. A small FastAPI/HTML viewer would unlock graph exploration. |
+| 11 | **Plugin system** (custom types/validators) | 🚧 Not started | P2 | `OKFValidator` is hardcoded. No custom concept types or validator hooks. |
+| 12 | **Multi-agent merge** | 🚧 Not started | P2 | Each agent is isolated. No `merge_bundles()` or conflict resolution API. |
+| 13 | **Hermes orchestration** | 🚧 Not started | P3 | Single agent per bundle. No multi-agent coordinator. |
+
+**Legend:**
+- ✅ Shipped — in `hermes-okf` v0.4.5
+- 🚧 Not started — on the backlog; not planned for 0.4.x
+
+**Current focus:** Bug fixes and Hermes CLI stability (0.4.x). Roadmap items 8–13 are for a 1.0 release.
 
 ---
 
