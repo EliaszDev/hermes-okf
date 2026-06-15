@@ -244,6 +244,11 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
 
     # -- Optional hooks (we implement the useful ones) ------------------------
 
+    def on_session_start(self, session_id: str) -> None:
+        """Called when Hermes starts a new session (after initialize)."""
+        if self._provider is not None:
+            self._provider.on_session_start(session_id)
+
     def on_session_end(self, messages: list[dict[str, Any]]) -> None:
         """End-of-session extraction."""
         if self._provider is None:

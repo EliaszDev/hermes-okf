@@ -127,6 +127,18 @@ def _graph_neighbors(args: argparse.Namespace) -> int:
     return 0
 
 
+def _install_plugin(args: argparse.Namespace) -> int:
+    from hermes_okf.install_plugin import install_plugin
+    install_plugin()
+    return 0
+
+
+def _uninstall_plugin(args: argparse.Namespace) -> int:
+    from hermes_okf.install_plugin import uninstall_plugin
+    uninstall_plugin()
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="hermes-okf",
@@ -180,6 +192,18 @@ def main(argv: list[str] | None = None) -> int:
     neighbors_parser = subparsers.add_parser("graph-neighbors", help="Show neighbors of a concept")
     neighbors_parser.add_argument("concept_id", help="Concept ID")
     neighbors_parser.set_defaults(func=_graph_neighbors)
+
+    # install-plugin
+    install_parser = subparsers.add_parser(
+        "install-plugin", help="Install hermes-okf as a Hermes plugin"
+    )
+    install_parser.set_defaults(func=_install_plugin)
+
+    # uninstall-plugin
+    uninstall_parser = subparsers.add_parser(
+        "uninstall-plugin", help="Remove hermes-okf from Hermes"
+    )
+    uninstall_parser.set_defaults(func=_uninstall_plugin)
 
     # agent snapshot
     snap_parser = subparsers.add_parser("snapshot", help="Save agent state snapshot")

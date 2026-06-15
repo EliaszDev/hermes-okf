@@ -94,7 +94,7 @@ Hermes uses filesystem-based discovery (`~/.hermes/plugins/`) not `importlib.met
 - `HermesOKFMemoryProvider` — Hermes Agent `MemoryProvider` ABC plugin adapter
 - Implements `sync_turn()`, `prefetch()`, `shutdown()`, `post_setup()` for native Hermes integration
 - `register_cli()` — adds `hermes okf search/list/snapshot/restore` CLI extension
-- Pip entry point: `hermes.memory_providers` for auto-discovery by Hermes Agent
+- Pip entry point: `hermes.memory_providers` for discovery by Hermes Agent (entry point exists; Hermes core needs importlib.metadata support)
 - Aligns with Hermes CONTRIBUTING.md policy: standalone memory plugins, no core changes needed
 
 ### Fixed

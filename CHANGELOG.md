@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2026-06-14
+
+### Added
+- `hermes-okf install-plugin` CLI command — standalone CLI now supports plugin installation
+- `hermes-okf uninstall-plugin` CLI command — standalone CLI now supports plugin removal
+- `HermesOKFMemoryProvider.on_session_start()` — standalone method for Hermes session lifecycle
+
+### Fixed
+- Removed false "auto-discovered" claims from documentation — Hermes uses filesystem discovery, not entry points
+- `recall()`/`prefetch()` — SearchIndex rebuilds correctly after invalidate()
+
 ## [0.4.2] - 2026-06-14
 
 ### Changed

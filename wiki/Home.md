@@ -30,7 +30,7 @@ Then `hermes` and the plugin is live. No manual YAML editing needed.
 - 🔗 **Knowledge Graph** — Implicit graph from markdown links
 - 📁 **Filesystem-First** — Plain `.md` + YAML, git-friendly
 - ⚡ **Zero-DB Core** — Single dependency: `pyyaml`
-- 🔌 **Hermes Plugin** — Native `MemoryProvider` ABC integration, auto-discovered
+- 🔌 **Hermes Plugin** — Native `MemoryProvider` ABC integration, discovered via `hermes-okf-install`
 - 🔄 **Resume** — Stop and restart, agent restores from OKF bundle
 - 📦 **Portable** — Clone bundle to another machine, resume instantly
 
