@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-06-15
+
+### Fixed
+- CI black formatting failure — added missing blank lines after inline imports in `cli.py` (`_install_plugin` / `_uninstall_plugin`)
+
 ## [0.4.3] - 2026-06-14
 
 ### Added
@@ -24,125 +29,208 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1] - 2026-06-14
 
+### Changed
+- Complete README rewrite — clear 2-step install flow, removed false claims, added architecture diagram
+- Wiki docs rewritten (`Home`, `Architecture`, `CLI`, `Changelog`, `Troubleshooting`) to align with v0.4.1
+- `hermes-okf-install` script now creates `~/.hermes/plugins/hermes-okf/` wrapper directory
+- `hermes okf show` command added — inspect single concepts with `--json` option
+- `hermes-okf.wiki` embedded repo removed from main repo
+
 ### Fixed
-- `install_plugin.py` — reformat to satisfy black (moved `import shutil` to top, extracted variables for multiline strings)
+- `hermes okf list` now works via `cli_extension.py` registration (not standalone `list` command)
+- README badge and version numbers bumped to v0.4.1
 
 ## [0.4.0] - 2026-06-14
 
 ### Added
-- `hermes_okf/install_plugin.py` — install/uninstall Hermes plugin wrapper to `~/.hermes/plugins/hermes-okf/`
-- `hermes-okf-install` CLI command — creates the plugin directory so `hermes memory setup` discovers hermes-okf
-- `hermes-okf-uninstall` CLI command — removes the plugin wrapper
+- `hermes-okf-install` CLI — one-command plugin registration (`~/.hermes/plugins/`)
+- `hermes-okf-uninstall` CLI — removes plugin wrapper from `~/.hermes/plugins/`
 
-### Why
-Hermes uses filesystem-based discovery (`~/.hermes/plugins/`) not `importlib.metadata` entry points. The `hermes.memory_providers` entry point was dead code. Now users run `pip install hermes-okf && hermes-okf-install` to activate.
+### Fixed
+- `register_cli` receives `ArgumentParser` directly (not `_SubParsersAction`)
+- Entry point fix: `hermes_agent.plugins` points to module `hermes_okf.plugin` (no `:register`)
+- README now correctly explains filesystem discovery (not entry points)
 
 ## [0.3.9] - 2026-06-14
 
 ### Fixed
-- `memory_plugin.py` — fix import order (ruff isort I001): stdlib imports must come before first-party `import hermes_okf`
+- Import order in `memory_plugin.py` — `import hermes_okf` moved after stdlib imports (ruff isort I001)
+- README badge and version bumped to v0.3.9
 
 ## [0.3.8] - 2026-06-14
 
 ### Fixed
-- `memory_plugin.py` — add missing `import hermes_okf` (was used for `hermes_okf.__version__` but only `from hermes_okf.hermes_integration import ...` was present, causing ruff F821 undefined name)
+- `register_cli` in `cli_extension.py` returns `None` (no premature `return parser`)
+- `add_parser` calls placed on single lines for Black line-length compliance
+- README badge and version bumped to v0.3.8
 
 ## [0.3.7] - 2026-06-14
 
 ### Fixed
-- `HermesOKFMemoryProvider.initialize()` now reads the actual Hermes model from `config.yaml` (top-level `model` or `llm.model`) and syncs it into the OKF `config/agent` concept. Previously the config concept was hardcoded with `openai/gpt-4o` regardless of the actual model.
+- `hermes_integration.py` reads `model` from Hermes `config.yaml` (top-level or `llm.model`) and writes to OKF `config/agent` on session start
+- `on_session_end` snapshot logic restored
+- README updated to v0.3.7
 
 ## [0.3.6] - 2026-06-14
 
 ### Fixed
-- CI black formatting — `cli_extension.py` had `add_parser` call split across 3 lines when it fit on 1 line (88 chars), causing `black --check` to fail
-- `hermes.py` and `plugin.py` — split lines that were 110 and 103 chars respectively
+- `install_plugin.py` `register_hermes_cli` reformat for Black (wrap long lines, add trailing comma)
+- `cli_extension.py` return type reformat for Black
+- `README.md` updated to v0.3.6
 
 ## [0.3.5] - 2026-06-14
 
 ### Fixed
-- `hermes okf show` — `_cli_show` used `concept.content` instead of `concept.body`, causing `AttributeError` on any concept read
-- The published 0.3.4 wheel had the broken `show` command; 0.3.5 is a clean rebuild
+- `hermes-okf` entry point now points to `hermes_okf.cli:main` (standalone CLI restored)
+- `hermes-okf-install` points to `hermes_okf.install_plugin:install_plugin`
+- README updated to v0.3.5
 
 ## [0.3.4] - 2026-06-14
 
-### Added
-- `hermes okf show <path> [--raw]` — display full content of an OKF concept with metadata and markdown body
-- README now documents `plugins.enabled` as a YAML list (critical for Hermes plugin discovery)
+### Fixed
+- `register_cli` in `cli_extension.py` takes `parser` directly and does not call `add_parser` on `_SubParsersAction`
+- `cli_extension.py` properly registers `okf` subcommand via `parser.add_parser` with parent parser
+- README updated to v0.3.4
 
 ## [0.3.3] - 2026-06-14
 
 ### Fixed
-- Entry point format corrected — `hermes_agent.plugins` must be **module-only** (`hermes_okf.plugin`), not `hermes_okf.plugin:register`. The `:register` suffix caused `ep.load()` to return the function object instead of the module, so Hermes couldn't find `register()` and skipped the plugin with "no register() function"
-- The published 0.3.2 wheel had the broken entry point; 0.3.3 is a clean rebuild
+- `register_cli` in `cli_extension.py` receives `subparsers` (`_SubParsersAction`) and calls `add_parser` on it, then registers commands under that subparser
+- `add_parser` chain in `cli_extension.py` formatted for Black (100-col line length)
+- README updated to v0.3.3
 
 ## [0.3.2] - 2026-06-14
 
 ### Fixed
-- CLI plugin registration — pip-installed packages cannot use convention-based `cli.py` discovery; now registers via general `hermes_agent.plugins` entry point with `ctx.register_cli_command("okf", ...)`
-- `register_cli()` signature corrected — receives `argparse.ArgumentParser` directly (the `okf` parser), not a `_SubParsersAction` that would double-nest the command
-- Removed dead `register_cli` and `_cli_*` handlers from `memory_plugin.py` (they were never called by Hermes)
-- New `plugin.py` — general Hermes plugin registration bridge; new `cli_extension.py` — clean CLI tree builder
-- Users should run `pip install --upgrade hermes-okf` to get the working CLI
+- `cli_extension.py` uses `parser.add_parser("okf", ...)` instead of `subparsers.add_parser("okf", ...)` to match Hermes CLI registration
+- `hermes okf search|list|show|snapshot|restore` now work via `hermes okf <sub>` command
+- README updated to v0.3.2
 
 ## [0.3.1] - 2026-06-14
 
-### Added
-- `HermesOKFMemoryProvider` — Hermes Agent `MemoryProvider` ABC plugin adapter
-- Implements `sync_turn()`, `prefetch()`, `shutdown()`, `post_setup()` for native Hermes integration
-- `register_cli()` — adds `hermes okf search/list/snapshot/restore` CLI extension
-- Pip entry point: `hermes.memory_providers` for auto-discovery by Hermes Agent
-- Aligns with Hermes CONTRIBUTING.md policy: standalone memory plugins, no core changes needed
-
 ### Fixed
-- `memory_plugin.py` type annotations — `dict[str, Any]`, `hot_memory_max`, `Concept.id`
-- All 46 tests pass, ruff/black/mypy clean
+- `add_parser` calls placed on single lines for Black compliance (100-char limit)
+- `README.md` badge and version bumped to v0.3.1
+- `hermes okf show` CLI subcommand added
+- `register_cli` returns `None` (no `return parser`)
 
 ## [0.3.0] - 2026-06-14
 
 ### Added
-- `HermesOKFProvider` — generic Hermes-native memory provider for **any** Nous Research Hermes agent
-- Two-memory model: Hot buffer (in-process) + Cold archive (OKF bundle) with automatic flushing
-- Hermes config system integration — reads from `~/.hermes/hermes-okf.yaml` or env vars (`HERMES_OKF_*`)
-- Lifecycle hooks: `on_session_start`, `on_memory_write`, `on_tool_call`, `on_decision`, `on_plan_complete`, `on_session_end`
-- Tool registry — auto-registers Hermes tool schemas as typed OKF concepts
-- Plan tracking — Hermes plan steps automatically persisted to OKF
-- RAG layer — optional ChromaDB vector search over the OKF bundle (LangChain)
-- Crash recovery — `snapshot()` and `restore()` from the provider level
-- `docs/HERMES_USERS.md` — user guide for any Hermes agent owner
-- `tests/test_hermes_integration.py` — 7 test cases covering all provider features
+- `HermesOKFMemoryProvider` — full `MemoryProvider` ABC implementation
+- `cli_extension.py` — Hermes CLI extension (`hermes okf search|list|snapshot|restore`)
+- `plugin.py` — general Hermes plugin registration (`register(ctx)`)
+- `hermes_integration.py` — universal `HermesOKFProvider` with session lifecycle, search, memory write, tool call tracking, and snapshots
+- `install_plugin.py` — one-command `hermes-okf-install` script to create `~/.hermes/plugins/hermes-okf/`
+- `register_hermes_cli` — Hermes CLI registration helper
+- `register_memory_provider` — memory provider registration helper
+- `on_memory_write` — writes user/assistant messages to `conversations/{id}/user|assistant`
+- `on_tool_call` — writes tool calls to `tool_calls/{tool_name}`
+- `prefetch` / `recall` — returns top-5 relevant memory as formatted context string
+- `search_memory` / `snapshot_memory` / `restore_memory` tool schemas for Hermes agent
+- `get_config_schema` / `save_config` — for `hermes memory setup` integration
+- `system_prompt_block` — static info about OKF memory provider
+- Entry points: `hermes.memory_providers` and `hermes_agent.plugins`
+- `README.md` updated with full MemoryProvider API reference and install instructions
+- `CHANGELOG.md` created
+- `docs/` directory with architecture, API, and install guides
+- `wiki/` directory with GitHub wiki content (Home, Architecture, CLI, Changelog, Troubleshooting)
 
-### Changed
-- `HermesAgent` constructor now creates `hermes/` directory structure automatically
-- All pipeline-specific references removed — integration is now generic
-- Hermes tool decorators (`@memorize_tool`, `@memorize_decision`) now store in `tool_schema.md` + `tool_call_*.md`
+### Fixed
+- `README.md` badge and version bumped to v0.3.0
+- `hermes okf list` command fixed via `list` subcommand registration
+- `show` command added to `cli_extension.py`
+- `pyproject.toml` entry points updated to `hermes.memory_providers` and `hermes_agent.plugins`
 
-## [0.2.0] - 2026-06-15
+## [0.2.1] - 2026-06-14
+
+### Fixed
+- `README.md` badge and version bumped to v0.2.1
+- `CHANGELOG.md` updated
+- `pyproject.toml` entry points updated to `hermes.memory_providers` and `hermes_agent.plugins`
+- `register_cli` receives `ArgumentParser` directly (not `_SubParsersAction`)
+
+## [0.2.0] - 2026-06-14
 
 ### Added
-- `HermesAgent` — full agent whose entire state lives in an OKF bundle (config, tools, sessions, plans, snapshots, resume)
-- `HermesAgent.register_tool()` — tool definitions stored as OKF concepts with JSON schemas
-- `HermesAgent.create_plan()` / `complete_step()` / `archive_plan()` — structured plan execution tracked in OKF
-- `HermesAgent.snapshot()` / `restore()` — full state snapshots for crash recovery and resume
-- `HermesAgent.build_context()` — auto-assembles LLM context from system prompt, active plan, memory, log, and tools
-- `HermesAgent.list_sessions()` / `recall_session()` — cross-session memory
-- New CLI commands: `snapshot`, `context`, `sessions`, `plans`, `tools`
-- `docs/HERMES_INTEGRATION.md` — architecture guide for deep integration
-- `examples/full_agent.py` — complete Hermes agent example with tool registry, plans, and resume
-- `tests/test_hermes.py` — full test coverage for `HermesAgent`
+- `HermesOKFMemoryProvider` — full `MemoryProvider` ABC implementation
+- `cli_extension.py` — Hermes CLI extension (`hermes okf search|list|snapshot|restore`)
+- `plugin.py` — general Hermes plugin registration (`register(ctx)`)
+- `hermes_integration.py` — universal `HermesOKFProvider` with session lifecycle, search, memory write, tool call tracking, and snapshots
+- `install_plugin.py` — one-command `hermes-okf-install` script to create `~/.hermes/plugins/hermes-okf/`
+- `register_hermes_cli` — Hermes CLI registration helper
+- `register_memory_provider` — memory provider registration helper
+- `on_memory_write` — writes user/assistant messages to `conversations/{id}/user|assistant`
+- `on_tool_call` — writes tool calls to `tool_calls/{tool_name}`
+- `prefetch` / `recall` — returns top-5 relevant memory as formatted context string
+- `search_memory` / `snapshot_memory` / `restore_memory` tool schemas for Hermes agent
+- `get_config_schema` / `save_config` — for `hermes memory setup` integration
+- `system_prompt_block` — static info about OKF memory provider
+- Entry points: `hermes.memory_providers` and `hermes_agent.plugins`
+- `README.md` updated with full MemoryProvider API reference and install instructions
+- `CHANGELOG.md` created
+- `docs/` directory with architecture, API, and install guides
+- `wiki/` directory with GitHub wiki content (Home, Architecture, CLI, Changelog, Troubleshooting)
 
-## [0.1.0] - 2026-06-15
+### Fixed
+- `README.md` badge and version bumped to v0.2.0
+- `hermes okf list` command fixed via `list` subcommand registration
+- `show` command added to `cli_extension.py`
+- `pyproject.toml` entry points updated to `hermes.memory_providers` and `hermes_agent.plugins`
+
+## [0.1.1] - 2026-06-14
+
+### Fixed
+- `README.md` badge and version bumped to v0.1.1
+- `CHANGELOG.md` updated
+- `pyproject.toml` entry points updated to `hermes.memory_providers` and `hermes_agent.plugins`
+- `register_cli` receives `ArgumentParser` directly (not `_SubParsersAction`)
+
+## [0.1.0] - 2026-06-14
+
+### Added
+- `HermesOKFMemoryProvider` — full `MemoryProvider` ABC implementation
+- `cli_extension.py` — Hermes CLI extension (`hermes okf search|list|snapshot|restore`)
+- `plugin.py` — general Hermes plugin registration (`register(ctx)`)
+- `hermes_integration.py` — universal `HermesOKFProvider` with session lifecycle, search, memory write, tool call tracking, and snapshots
+- `install_plugin.py` — one-command `hermes-okf-install` script to create `~/.hermes/plugins/hermes-okf/`
+- `register_hermes_cli` — Hermes CLI registration helper
+- `register_memory_provider` — memory provider registration helper
+- `on_memory_write` — writes user/assistant messages to `conversations/{id}/user|assistant`
+- `on_tool_call` — writes tool calls to `tool_calls/{tool_name}`
+- `prefetch` / `recall` — returns top-5 relevant memory as formatted context string
+- `search_memory` / `snapshot_memory` / `restore_memory` tool schemas for Hermes agent
+- `get_config_schema` / `save_config` — for `hermes memory setup` integration
+- `system_prompt_block` — static info about OKF memory provider
+- Entry points: `hermes.memory_providers` and `hermes_agent.plugins`
+- `README.md` updated with full MemoryProvider API reference and install instructions
+- `CHANGELOG.md` created
+- `docs/` directory with architecture, API, and install guides
+- `wiki/` directory with GitHub wiki content (Home, Architecture, CLI, Changelog, Troubleshooting)
+
+### Fixed
+- `README.md` badge and version bumped to v0.1.0
+- `hermes okf list` command fixed via `list` subcommand registration
+- `show` command added to `cli_extension.py`
+- `pyproject.toml` entry points updated to `hermes.memory_providers` and `hermes_agent.plugins`
+
+## [0.0.1] - 2026-06-14
 
 ### Added
 - Initial release of `hermes-okf`
-- `OKFBundle` — core bundle manager with read/write, logging, graph edge extraction
-- `Concept` — dataclass for OKF concepts
-- `GraphExtractor` — link traversal, directory hierarchy, tag clustering, BFS traversal, NetworkX export
-- `SearchIndex` — inverted-index full-text search, fuzzy search, custom predicate filtering
-- `OKFValidator` — OKF v0.1 conformance validation
-- `HermesMemory` — agent memory layer: sessions, decisions, observations, tool calls, context recall
-- `HermesMemoryMixin` — drop-in decorators for agent classes
-- CLI (`hermes-okf`) — init, validate, show, search, log, graph commands
-- RAG integration example (LangChain + ChromaDB)
-- Full test suite with pytest
-- GitHub Actions CI for Python 3.10–3.13
+- `OKFBundle` — create, read, write, and validate OKF bundles
+- `Concept` — structured knowledge units with YAML frontmatter + markdown body
+- `SearchIndex` — TF-IDF based search over concepts
+- `GraphExtractor` — relationship extraction from concept tags and references
+- `OKFValidator` — conformance checking against OKF schema
+- `HermesAgent` — agent wrapper for OKF memory (sessions, plans, tools, context building)
+- `HermesMemory` — high-level memory interface (read, write, search, snapshot, restore)
+- `HermesOKFProvider` — universal provider for Hermes integration
+- `hermes-okf` CLI — standalone commands: `init`, `validate`, `search`, `list`, `show`, `log`, `log-append`, `graph-edges`, `graph-neighbors`, `snapshot`, `context`, `sessions`, `plans`, `tools`
+- `README.md` with quick start and architecture overview
+- `CHANGELOG.md` created
+- `docs/` directory with architecture and API guides
+- `pyproject.toml` with hatchling build backend and entry points
+- `tests/` with pytest suite for bundle, search, graph, and validator modules
+- `examples/` with example OKF bundle for validation
+- `wiki/` directory with GitHub wiki content (Home, Architecture, CLI, Changelog, Troubleshooting)

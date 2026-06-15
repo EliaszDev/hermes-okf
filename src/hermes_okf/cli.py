@@ -129,12 +129,14 @@ def _graph_neighbors(args: argparse.Namespace) -> int:
 
 def _install_plugin(args: argparse.Namespace) -> int:
     from hermes_okf.install_plugin import install_plugin
+
     install_plugin()
     return 0
 
 
 def _uninstall_plugin(args: argparse.Namespace) -> int:
     from hermes_okf.install_plugin import uninstall_plugin
+
     uninstall_plugin()
     return 0
 
