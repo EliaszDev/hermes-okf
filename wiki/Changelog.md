@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.4] - 2026-06-15
+
+### Fixed
+- CI black formatting — `cli.py` missing blank lines after inline imports in `_install_plugin` / `_uninstall_plugin` caused `black --check` to fail
+- Merged PyPI publish into CI workflow — publish now gates on tests passing and skips duplicate versions gracefully
+
+## [0.4.3] - 2026-06-14
+
+### Added
+- `hermes-okf install-plugin` / `uninstall-plugin` — standalone CLI now supports plugin installation/removal without the separate `hermes-okf-install` script
+- `HermesOKFMemoryProvider.on_session_start()` — standalone method for Hermes session lifecycle hook
+
+### Fixed
+- Removed false "auto-discovered" claims from documentation — Hermes uses filesystem discovery (`~/.hermes/plugins/`), not entry points
+- `recall()` / `prefetch()` — SearchIndex rebuilds correctly after `invalidate()`
+
+## [0.4.2] - 2026-06-14
+
+### Changed
+- `hermes-okf-install` now **auto-configures `~/.hermes/config.yaml`** — adds `hermes-okf` to `plugins.enabled`, sets `memory.provider`, and sets `bundle_path`. No manual YAML editing needed.
+- Install flow reduced from 4 steps to **2 steps**: `pip install hermes-okf && hermes-okf-install`, then `hermes`.
+
 ## [0.4.1] - 2026-06-14
 
 ### Fixed

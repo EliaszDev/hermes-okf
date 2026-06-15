@@ -15,7 +15,7 @@ Welcome to the **hermes-okf** wiki. This is the knowledge base for installing, c
 
 The first open-source memory system built on Google's **Open Knowledge Format (OKF)** for the Hermes agent ecosystem. It gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem.
 
-**Key feature (v0.4.2):** `hermes-okf-install` now **auto-configures `~/.hermes/config.yaml`**. The install flow is just **2 steps**:
+**Key feature (v0.4.4):** `hermes-okf-install` now **auto-configures `~/.hermes/config.yaml`**. The install flow is just **2 steps**:
 
 ```bash
 pip install hermes-okf
@@ -36,9 +36,11 @@ Then `hermes` and the plugin is live. No manual YAML editing needed.
 
 ## Latest Version
 
-**v0.4.2** — [View on PyPI](https://pypi.org/project/hermes-okf/)
+**v0.4.4** — [View on PyPI](https://pypi.org/project/hermes-okf/)
 
 **Latest fixes:**
+- v0.4.4 — CI publish pipeline gating + black formatting fix; `install-plugin`/`uninstall-plugin` in standalone CLI
+- v0.4.3 — `hermes-okf install-plugin` / `uninstall-plugin` in standalone CLI; `on_session_start()` hook
 - v0.4.2 — `hermes-okf-install` auto-configures `~/.hermes/config.yaml` (no manual YAML editing)
 - v0.4.1 — `hermes-okf-install` / `hermes-okf-uninstall` commands for plugin registration
 - v0.3.9 — Import order fixes for CI compliance
