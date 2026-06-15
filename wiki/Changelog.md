@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.6] - 2026-06-15
+
+### Fixed
+- CLI `--path` now works after subcommands (`hermes-okf validate --path /tmp/test`). Added `--version` flag.
+
 ## [0.4.5] - 2026-06-15
 
 ### Fixed

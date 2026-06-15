@@ -10,6 +10,7 @@ import argparse
 import sys
 from pathlib import Path
 
+import hermes_okf
 from hermes_okf.bundle import OKFBundle
 from hermes_okf.graph import GraphExtractor
 from hermes_okf.search import SearchIndex
@@ -193,90 +194,118 @@ def main(argv: list[str] | None = None) -> int:
         prog="hermes-okf",
         description="Universal OKF-based memory system for Hermes agent",
     )
-    parser.add_argument("--path", default=".", help="Path to OKF bundle (default: .)")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"hermes-okf {hermes_okf.__version__}",
+    )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
+    # Shared parent parser for --path so it can appear after any subcommand.
+    path_parent = argparse.ArgumentParser(add_help=False)
+    path_parent.add_argument("--path", default=".", help="Path to OKF bundle (default: .)")
+
     # init
-    init_parser = subparsers.add_parser("init", help="Initialise a new OKF bundle")
+    init_parser = subparsers.add_parser(
+        "init", parents=[path_parent], help="Initialise a new OKF bundle"
+    )
     init_parser.add_argument("init_path", nargs="?", default=None, help="Bundle path")
     init_parser.add_argument("--force", action="store_true", help="Overwrite non-empty dir")
     init_parser.set_defaults(func=_init_bundle)
 
     # validate
-    validate_parser = subparsers.add_parser("validate", help="Validate OKF conformance")
+    validate_parser = subparsers.add_parser(
+        "validate", parents=[path_parent], help="Validate OKF conformance"
+    )
     validate_parser.set_defaults(func=_validate)
 
     # list
-    list_parser = subparsers.add_parser("list", help="List concepts")
+    list_parser = subparsers.add_parser("list", parents=[path_parent], help="List concepts")
     list_parser.add_argument("--subdir", help="Filter by subdirectory")
     list_parser.set_defaults(func=_list_concepts)
 
     # show
-    show_parser = subparsers.add_parser("show", help="Show a concept")
+    show_parser = subparsers.add_parser("show", parents=[path_parent], help="Show a concept")
     show_parser.add_argument("concept_id", help="Concept ID (e.g. projects/my_project)")
     show_parser.add_argument("--json", action="store_true", help="Output as JSON")
     show_parser.set_defaults(func=_show_concept)
 
     # search
-    search_parser = subparsers.add_parser("search", help="Search concepts")
+    search_parser = subparsers.add_parser("search", parents=[path_parent], help="Search concepts")
     search_parser.add_argument("query", help="Search query")
     search_parser.add_argument("--top-k", type=int, default=10, help="Max results")
     search_parser.set_defaults(func=_search)
 
     # log
-    log_parser = subparsers.add_parser("log", help="Show agent log")
+    log_parser = subparsers.add_parser("log", parents=[path_parent], help="Show agent log")
     log_parser.set_defaults(func=_log)
 
     # log-append
-    log_append_parser = subparsers.add_parser("log-append", help="Append to agent log")
+    log_append_parser = subparsers.add_parser(
+        "log-append", parents=[path_parent], help="Append to agent log"
+    )
     log_append_parser.add_argument("entry", help="Log entry text")
     log_append_parser.add_argument("--category", default="Update", help="Entry category")
     log_append_parser.set_defaults(func=_append_log)
 
     # graph edges
-    edges_parser = subparsers.add_parser("graph-edges", help="Show all graph edges")
+    edges_parser = subparsers.add_parser(
+        "graph-edges", parents=[path_parent], help="Show all graph edges"
+    )
     edges_parser.set_defaults(func=_graph_edges)
 
     # graph neighbors
-    neighbors_parser = subparsers.add_parser("graph-neighbors", help="Show neighbors of a concept")
+    neighbors_parser = subparsers.add_parser(
+        "graph-neighbors",
+        parents=[path_parent],
+        help="Show neighbors of a concept",
+    )
     neighbors_parser.add_argument("concept_id", help="Concept ID")
     neighbors_parser.set_defaults(func=_graph_neighbors)
 
-    # install-plugin
+    # install-plugin (no --path needed)
     install_parser = subparsers.add_parser(
         "install-plugin", help="Install hermes-okf as a Hermes plugin"
     )
     install_parser.set_defaults(func=_install_plugin)
 
-    # uninstall-plugin
+    # uninstall-plugin (no --path needed)
     uninstall_parser = subparsers.add_parser(
         "uninstall-plugin", help="Remove hermes-okf from Hermes"
     )
     uninstall_parser.set_defaults(func=_uninstall_plugin)
 
     # agent snapshot
-    snap_parser = subparsers.add_parser("snapshot", help="Save agent state snapshot")
+    snap_parser = subparsers.add_parser(
+        "snapshot", parents=[path_parent], help="Save agent state snapshot"
+    )
     snap_parser.add_argument("--note", default="", help="Snapshot note")
     snap_parser.add_argument("--agent-id", default="hermes", help="Agent ID")
     snap_parser.set_defaults(func=_snapshot)
 
     # agent context
-    ctx_parser = subparsers.add_parser("context", help="Build LLM context from bundle")
+    ctx_parser = subparsers.add_parser(
+        "context", parents=[path_parent], help="Build LLM context from bundle"
+    )
     ctx_parser.add_argument("query", help="Query to build context around")
     ctx_parser.add_argument("--top-k", type=int, default=5, help="Relevant concepts to include")
     ctx_parser.add_argument("--agent-id", default="hermes", help="Agent ID")
     ctx_parser.set_defaults(func=_context)
 
     # sessions
-    sess_parser = subparsers.add_parser("sessions", help="List agent sessions")
+    sess_parser = subparsers.add_parser(
+        "sessions", parents=[path_parent], help="List agent sessions"
+    )
     sess_parser.set_defaults(func=_sessions)
 
     # plans
-    plan_parser = subparsers.add_parser("plans", help="List agent plans")
+    plan_parser = subparsers.add_parser("plans", parents=[path_parent], help="List agent plans")
     plan_parser.set_defaults(func=_plans)
 
     # tools
-    tools_parser = subparsers.add_parser("tools", help="List registered tools")
+    tools_parser = subparsers.add_parser(
+        "tools", parents=[path_parent], help="List registered tools"
+    )
     tools_parser.set_defaults(func=_tools)
 
     args = parser.parse_args(argv)

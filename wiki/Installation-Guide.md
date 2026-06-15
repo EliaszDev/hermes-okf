@@ -28,7 +28,7 @@ To verify the installation:
 
 ```bash
 python -c "import hermes_okf; print(hermes_okf.__version__)"
-# Expected: 0.4.5 or higher
+# Expected: 0.4.6 or higher
 ```
 
 ---
@@ -53,7 +53,7 @@ Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
 `~/.hermes/plugins/hermes-okf/plugin.yaml` — Manifest that Hermes reads:
 ```yaml
 name: hermes-okf
-version: 0.4.5
+version: 0.4.6
 description: "OKF-based memory provider for Hermes agent..."
 hooks:
   - on_session_end
