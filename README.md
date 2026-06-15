@@ -4,9 +4,9 @@
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OKF](https://img.shields.io/badge/OKF-v0.4.1-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
+[![OKF](https://img.shields.io/badge/OKF-v0.4.2-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
-> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. v0.4.1 adds `hermes-okf-install` — a one-command plugin registration that makes `hermes memory setup` discover hermes-okf automatically. `pip install hermes-okf && hermes-okf-install` and you're live.**
+> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. `pip install hermes-okf && hermes-okf-install` — two commands and you're live. The install command auto-configures `~/.hermes/config.yaml` so `hermes memory setup` finds the plugin immediately. `hermes okf search|list|show|snapshot|restore` work out of the box.**
 
 Hermes OKF gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem. Every decision, observation, and project context lives in a human-readable knowledge graph that your agent can read, write, and traverse programmatically.
 
@@ -49,39 +49,20 @@ Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
   Run 'hermes memory setup' to activate
 ```
 
-> **What this does:** Creates `~/.hermes/plugins/hermes-okf/` with a `plugin.yaml` manifest and `__init__.py` wrapper that imports `HermesOKFMemoryProvider`. Hermes scans this directory on startup and finds your plugin.
+> **What this does:** Creates `~/.hermes/plugins/hermes-okf/` and auto-updates `~/.hermes/config.yaml` to add `hermes-okf` to `plugins.enabled` and set `memory.provider`. Hermes finds the plugin on next startup.
 
-### Step 3 — Add to Hermes config
-
-Edit `~/.hermes/config.yaml`:
-
-```yaml
-plugins:
-  enabled:
-    - hermes-okf
-
-memory:
-  provider: hermes-okf
-  bundle_path: ~/.hermes/okf_memory
-  agent_id: hermes-alpha
-```
-
-> **Important:** `plugins.enabled` must be a YAML list, not a string. If you use `hermes config set plugins.enabled '["hermes-okf"]'`, it stores a JSON string which Hermes ignores. Edit `~/.hermes/config.yaml` directly to ensure it's a proper list.
-
-### Step 4 — Run the setup wizard
-
-```bash
-hermes memory setup
-```
-
-This will prompt you for:
-- Directory where OKF memory bundle is stored (default: `~/.hermes/okf_memory`)
-- Identifier for this agent's memory (default: `hermes-agent`)
-
-After setup, start a new Hermes session to activate the plugin:
+### Step 3 — Start Hermes
 
 ```bash
 hermes
+```
+
+The plugin activates on first session start. Your OKF bundle is created at `~/.hermes/okf_memory/` automatically.
+
+**Optional:** Run the setup wizard to customize bundle path and agent ID:
+
+```bash
+hermes memory setup
 ```
 
 ### Uninstall

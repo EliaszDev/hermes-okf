@@ -1,6 +1,6 @@
 # Installation Guide
 
-> **Install hermes-okf as a Hermes Agent plugin in 4 steps.**
+> **Install hermes-okf as a Hermes Agent plugin in 2 steps.**
 
 ---
 
@@ -28,14 +28,12 @@ To verify the installation:
 
 ```bash
 python -c "import hermes_okf; print(hermes_okf.__version__)"
-# Expected: 0.4.1 or higher
+# Expected: 0.4.2 or higher
 ```
 
 ---
 
-## Step 2 — Register the Plugin in Hermes
-
-Hermes discovers plugins from the `~/.hermes/plugins/` directory. Run the install command to create the plugin wrapper:
+## Step 2 — Register the Plugin
 
 ```bash
 hermes-okf-install
@@ -44,89 +42,53 @@ hermes-okf-install
 Expected output:
 ```
 Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
-  Run 'hermes memory setup' to activate
+  Updated ~/.hermes/config.yaml
+  Run 'hermes memory setup' to finish activation
 ```
 
-### What this does
+### What this does (automatically)
 
-Creates `~/.hermes/plugins/hermes-okf/` with two files:
+**1. Creates plugin wrapper:**
 
-**`plugin.yaml`** — Manifest that Hermes reads:
+`~/.hermes/plugins/hermes-okf/plugin.yaml` — Manifest that Hermes reads:
 ```yaml
 name: hermes-okf
-version: 0.4.1
+version: 0.4.2
 description: "OKF-based memory provider for Hermes agent..."
 hooks:
   - on_session_end
 ```
 
-**`__init__.py`** — Wrapper that imports the provider:
+`~/.hermes/plugins/hermes-okf/__init__.py` — Wrapper that imports the provider:
 ```python
 from hermes_okf.memory_plugin import HermesOKFMemoryProvider
 __all__ = ["HermesOKFMemoryProvider"]
 ```
 
+**2. Auto-configures Hermes:**
+
+Reads `~/.hermes/config.yaml` and adds:
+- `hermes-okf` to `plugins.enabled`
+- `memory.provider: hermes-okf`
+- `memory.bundle_path: ~/.hermes/okf_memory`
+
 ### Why this is needed
 
 Hermes uses **filesystem-based discovery** (`~/.hermes/plugins/`), not `importlib.metadata` entry points. The `hermes.memory_providers` entry point in `pyproject.toml` exists but is never read by Hermes core.
 
-The `hermes-okf-install` command creates the wrapper directory so Hermes finds the plugin at startup.
+The `hermes-okf-install` command creates the wrapper directory and configures Hermes so it finds the plugin immediately.
 
 ---
 
-## Step 3 — Add to Hermes Config
+## Activate
 
-Edit `~/.hermes/config.yaml`:
-
-```yaml
-plugins:
-  enabled:
-    - hermes-okf
-
-memory:
-  provider: hermes-okf
-  bundle_path: ~/.hermes/okf_memory
-  agent_id: hermes-alpha
-```
-
-### Important notes
-
-- **`plugins.enabled` must be a YAML list**, not a string. If you use `hermes config set plugins.enabled '["hermes-okf"]'`, it stores a JSON string which Hermes ignores. Edit `~/.hermes/config.yaml` directly.
-- The `bundle_path` is where your OKF memory files will be stored. Default is `~/.hermes/okf_memory/`.
-- The `agent_id` identifies this agent's memory. Use something unique if you run multiple agents.
-
----
-
-## Step 4 — Run the Setup Wizard
-
-```bash
-hermes memory setup
-```
-
-The wizard will prompt you for:
-
-1. **Directory where OKF memory bundle is stored** — Press Enter to accept `~/.hermes/okf_memory`
-2. **Identifier for this agent's memory** — Press Enter to accept `hermes-agent`
-
-After setup completes, you'll see:
-```
-Memory provider: hermes-okf
-Activation saved to config.yaml
-Provider config saved
-Start a new session to activate.
-```
-
----
-
-## Activate the Plugin
-
-Start a new Hermes session:
+Start Hermes:
 
 ```bash
 hermes
 ```
 
-The plugin will initialize automatically. On first run, it creates the OKF bundle structure:
+The plugin activates on first session start. On first run, it creates the OKF bundle structure:
 ```
 ~/.hermes/okf_memory/
 ├── config/
@@ -146,6 +108,20 @@ hermes okf show config/agent
 ```
 
 You should see your agent's configuration with the correct model from `config.yaml`.
+
+---
+
+## Optional: Customize with Setup Wizard
+
+If you want to customize the bundle path or agent ID:
+
+```bash
+hermes memory setup
+```
+
+The wizard will prompt you for:
+- Directory where OKF memory bundle is stored (default: `~/.hermes/okf_memory`)
+- Identifier for this agent's memory (default: `hermes-agent`)
 
 ---
 

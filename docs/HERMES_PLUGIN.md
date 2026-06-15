@@ -24,7 +24,7 @@ Hermes' default memory is **small, hot, and curated** — two flat text files (`
 
 ---
 
-## Installation (v0.4.1+)
+## Installation (v0.4.2+)
 
 ### 1. Install hermes-okf
 
@@ -32,36 +32,28 @@ Hermes' default memory is **small, hot, and curated** — two flat text files (`
 pip install hermes-okf
 ```
 
-### 2. Register the plugin in Hermes
+### 2. Register the plugin
 
 ```bash
 hermes-okf-install
 ```
 
-This creates `~/.hermes/plugins/hermes-okf/` with:
-- `plugin.yaml` — manifest that Hermes reads
-- `__init__.py` — imports `HermesOKFMemoryProvider`
+This does **everything automatically**:
 
-> **Why this is needed:** Hermes uses filesystem-based discovery (`~/.hermes/plugins/`), not `importlib.metadata` entry points. The `hermes.memory_providers` entry point exists but is never read by Hermes. The `hermes-okf-install` command creates the wrapper directory so Hermes finds the plugin.
+1. **Creates** `~/.hermes/plugins/hermes-okf/` with `plugin.yaml` + `__init__.py`
+2. **Updates** `~/.hermes/config.yaml` to add `hermes-okf` to `plugins.enabled` and set `memory.provider`
 
-### 3. Configure Hermes
+> **Why this is needed:** Hermes uses filesystem-based discovery (`~/.hermes/plugins/`), not `importlib.metadata` entry points. The `hermes.memory_providers` entry point exists but is never read by Hermes. The `hermes-okf-install` command creates the wrapper directory and configures Hermes so it finds the plugin immediately.
 
-Edit `~/.hermes/config.yaml`:
+### 3. Start Hermes
 
-```yaml
-plugins:
-  enabled:
-    - hermes-okf
-
-memory:
-  provider: hermes-okf
-  bundle_path: ~/.hermes/okf_memory
-  agent_id: hermes-alpha
+```bash
+hermes
 ```
 
-> **Important:** `plugins.enabled` must be a YAML list, not a string. If you use `hermes config set plugins.enabled '["hermes-okf"]'`, it stores a JSON string which Hermes ignores. Edit `~/.hermes/config.yaml` directly to ensure it's a proper list.
+The plugin activates on first session start. Your OKF bundle is created at `~/.hermes/okf_memory/` automatically.
 
-### 4. Activate
+**Optional:** Run `hermes memory setup` to customize bundle path or agent ID.
 
 ```bash
 hermes memory setup

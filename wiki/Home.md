@@ -4,7 +4,8 @@ Welcome to the **hermes-okf** wiki. This is the knowledge base for installing, c
 
 ## Quick Links
 
-- [Installation Guide](Installation-Guide) — Step-by-step setup for Hermes plugin
+- [Quick Start](Quick-Start) — **2-step setup: pip install + hermes-okf-install**
+- [Installation Guide](Installation-Guide) — Detailed setup with virtual environments
 - [CLI Reference](CLI-Reference) — All commands explained
 - [Troubleshooting](Troubleshooting) — Common issues and fixes
 - [Architecture](Architecture) — How it works under the hood
@@ -14,13 +15,14 @@ Welcome to the **hermes-okf** wiki. This is the knowledge base for installing, c
 
 The first open-source memory system built on Google's **Open Knowledge Format (OKF)** for the Hermes agent ecosystem. It gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem.
 
-**Key feature (v0.4.1):** `hermes-okf-install` — a one-command plugin registration that makes `hermes memory setup` discover hermes-okf automatically.
+**Key feature (v0.4.2):** `hermes-okf-install` now **auto-configures `~/.hermes/config.yaml`**. The install flow is just **2 steps**:
 
 ```bash
 pip install hermes-okf
 hermes-okf-install
-hermes memory setup
 ```
+
+Then `hermes` and the plugin is live. No manual YAML editing needed.
 
 ## Features
 
@@ -28,15 +30,16 @@ hermes memory setup
 - 🔗 **Knowledge Graph** — Implicit graph from markdown links
 - 📁 **Filesystem-First** — Plain `.md` + YAML, git-friendly
 - ⚡ **Zero-DB Core** — Single dependency: `pyyaml`
-- 🔌 **Hermes Plugin** — Native `MemoryProvider` ABC integration
+- 🔌 **Hermes Plugin** — Native `MemoryProvider` ABC integration, auto-discovered
 - 🔄 **Resume** — Stop and restart, agent restores from OKF bundle
 - 📦 **Portable** — Clone bundle to another machine, resume instantly
 
 ## Latest Version
 
-**v0.4.1** — [View on PyPI](https://pypi.org/project/hermes-okf/)
+**v0.4.2** — [View on PyPI](https://pypi.org/project/hermes-okf/)
 
 **Latest fixes:**
+- v0.4.2 — `hermes-okf-install` auto-configures `~/.hermes/config.yaml` (no manual YAML editing)
 - v0.4.1 — `hermes-okf-install` / `hermes-okf-uninstall` commands for plugin registration
 - v0.3.9 — Import order fixes for CI compliance
 - v0.3.7 — Hermes model auto-sync from `config.yaml` to OKF config
