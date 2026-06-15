@@ -6,9 +6,164 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![OKF](https://img.shields.io/badge/OKF-v0.4.1-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
-> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. v0.4.1 fixes black formatting. `hermes-okf-install` registers the plugin in `~/.hermes/plugins/` so `hermes memory setup` discovers it. `pip install hermes-okf && hermes-okf-install` and you're live.**
+> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. v0.4.1 adds `hermes-okf-install` — a one-command plugin registration that makes `hermes memory setup` discover hermes-okf automatically. `pip install hermes-okf && hermes-okf-install` and you're live.**
 
 Hermes OKF gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem. Every decision, observation, and project context lives in a human-readable knowledge graph that your agent can read, write, and traverse programmatically.
+
+---
+
+## Table of Contents
+
+- [Quick Start: Install as Hermes Plugin](#quick-start-install-as-hermes-plugin)
+- [Hermes Plugin CLI Commands](#hermes-plugin-cli-commands)
+- [Standalone CLI](#standalone-cli)
+- [Why OKF?](#why-okf)
+- [Architecture](#architecture)
+- [Agent Integration](#agent-integration)
+- [RAG Integration (Optional)](#rag-integration-optional)
+- [Development](#development)
+- [Troubleshooting](#troubleshooting)
+- [Roadmap](#roadmap)
+
+---
+
+## Quick Start: Install as Hermes Plugin
+
+### Step 1 — Install from PyPI
+
+```bash
+pip install hermes-okf
+```
+
+### Step 2 — Register the plugin in Hermes
+
+Hermes discovers plugins from the `~/.hermes/plugins/` directory. Run the install command to create the plugin wrapper:
+
+```bash
+hermes-okf-install
+```
+
+Expected output:
+```
+Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
+  Run 'hermes memory setup' to activate
+```
+
+> **What this does:** Creates `~/.hermes/plugins/hermes-okf/` with a `plugin.yaml` manifest and `__init__.py` wrapper that imports `HermesOKFMemoryProvider`. Hermes scans this directory on startup and finds your plugin.
+
+### Step 3 — Add to Hermes config
+
+Edit `~/.hermes/config.yaml`:
+
+```yaml
+plugins:
+  enabled:
+    - hermes-okf
+
+memory:
+  provider: hermes-okf
+  bundle_path: ~/.hermes/okf_memory
+  agent_id: hermes-alpha
+```
+
+> **Important:** `plugins.enabled` must be a YAML list, not a string. If you use `hermes config set plugins.enabled '["hermes-okf"]'`, it stores a JSON string which Hermes ignores. Edit `~/.hermes/config.yaml` directly to ensure it's a proper list.
+
+### Step 4 — Run the setup wizard
+
+```bash
+hermes memory setup
+```
+
+This will prompt you for:
+- Directory where OKF memory bundle is stored (default: `~/.hermes/okf_memory`)
+- Identifier for this agent's memory (default: `hermes-agent`)
+
+After setup, start a new Hermes session to activate the plugin:
+
+```bash
+hermes
+```
+
+### Uninstall
+
+To remove the plugin wrapper from Hermes:
+
+```bash
+hermes-okf-uninstall
+```
+
+This removes `~/.hermes/plugins/hermes-okf/` but does not delete your OKF bundle.
+
+---
+
+## Hermes Plugin CLI Commands
+
+When installed as a Hermes plugin, these subcommands are available under `hermes okf`:
+
+```bash
+# Search your OKF memory
+hermes okf search "dark mode"
+
+# List stored concepts (optionally filter by type)
+hermes okf list --type Decision
+
+# Show full content of a specific concept
+hermes okf show config/agent
+hermes okf show sessions/2026-06-14T22-14-58Z
+hermes okf show sessions/2026-06-14T22-14-58Z --raw  # metadata stripped
+
+# Save a snapshot
+hermes okf snapshot --note "Before deployment"
+
+# Restore from last snapshot
+hermes okf restore
+```
+
+The `show` command displays the full concept with YAML frontmatter and markdown body, making it easy to inspect any piece of your agent's memory.
+
+---
+
+## Standalone CLI
+
+Even without the Hermes plugin, you can use `hermes-okf` as a standalone knowledge management tool:
+
+```bash
+# Initialise a new OKF bundle
+hermes-okf init ./knowledge
+
+# Validate conformance
+hermes-okf validate --path ./knowledge
+
+# List concepts
+hermes-okf list --path ./knowledge
+
+# Show a concept
+hermes-okf show --path ./knowledge projects/my_project
+
+# Search
+hermes-okf search --path ./knowledge "ffmpeg GPU"
+
+# View log
+hermes-okf log --path ./knowledge
+
+# Append to log
+hermes-okf log-append --path ./knowledge "New decision made" --category Decision
+
+# Graph inspection
+hermes-okf graph-edges --path ./knowledge
+hermes-okf graph-neighbors --path ./knowledge projects/my_project
+
+# Save snapshot
+hermes-okf snapshot --path ./knowledge --note "Before deploy"
+
+# Build LLM context
+hermes-okf context --path ./knowledge "What should I prioritize?"
+
+# List sessions, plans, tools
+hermes-okf sessions --path ./knowledge
+hermes-okf plans --path ./knowledge
+hermes-okf tools --path ./knowledge
+```
 
 ---
 
@@ -20,7 +175,7 @@ Hermes OKF gives your AI agent a **persistent, structured, version-controlled me
 | 🔗 **Knowledge Graph** | Implicit graph from markdown links — no RDF, no Cypher |
 | 📁 **Filesystem-First** | Plain `.md` + YAML. `cat` it, `grep` it, Git it. |
 | ⚡ **Zero-DB Core** | Single dependency: `pyyaml`. Optional RAG via LangChain/ChromaDB. |
-| 🔌 **Hermes Plugin** | `HermesOKFMemoryProvider` — native `MemoryProvider` ABC, auto-discovered after `pip install` |
+| 🔌 **Hermes Plugin** | `HermesOKFMemoryProvider` — native `MemoryProvider` ABC, discovered via `hermes-okf-install` |
 | 🎁 **Hermes-Ready** | Drop-in decorators: `@memorize_decision`, `@memorize_tool` |
 | 🔄 **Resume** | Stop and restart — the agent restores from its OKF bundle |
 | 📦 **Portable** | Clone a bundle to another machine — the agent resumes instantly. |
@@ -49,70 +204,38 @@ Hermes OKF gives your AI agent a **persistent, structured, version-controlled me
 
 ---
 
-## Quick Start
+## Architecture
 
-### As a Hermes Agent Plugin (Recommended)
-
-```bash
-pip install hermes-okf
-hermes-okf-install
+```
+┌─────────────────────────────────────────────────────────────┐
+│  HUMAN INTERFACE                                              │
+│  ├─ hermes okf search|list|show|snapshot|restore  (Hermes CLI) │
+│  ├─ hermes-okf init|validate|search|show...     (Standalone)  │
+│  ├─ hermes-okf-install / hermes-okf-uninstall  (Plugin mgmt) │
+├─────────────────────────────────────────────────────────────┤
+│  HERMES PLUGIN LAYER                                          │
+│  ├─ HermesOKFMemoryProvider  ← MemoryProvider ABC implementation│
+│  ├─ plugin.py / cli_extension.py  ← CLI registration bridge    │
+│  ├─ install_plugin.py  ← Creates ~/.hermes/plugins/hermes-okf/│
+├─────────────────────────────────────────────────────────────┤
+│  UNIVERSAL PROVIDER                                           │
+│  ├─ HermesOKFProvider  ← Any Hermes agent can use it          │
+│  ├─ HermesAgent / MemoryMixin  ← Drop-in decorators           │
+│  ├─ HotMemoryBuffer  ← In-process fast write buffer           │
+├─────────────────────────────────────────────────────────────┤
+│  CORE OKF LAYER                                               │
+│  ├─ OKFBundle  ← File I/O, concept CRUD, logging            │
+│  ├─ Concept  ← Dataclass: type, title, body, metadata         │
+│  ├─ GraphExtractor  ← Link traversal, tag clustering          │
+│  ├─ SearchIndex  ← Full-text + fuzzy search                 │
+│  └─ OKFValidator  ← Conformance checking                      │
+├─────────────────────────────────────────────────────────────┤
+│  PERSISTENCE                                                  │
+│  └─ Filesystem (markdown + YAML frontmatter)                  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-Add to `~/.hermes/config.yaml`:
-
-```yaml
-plugins:
-  enabled:
-    - hermes-okf
-
-memory:
-  provider: hermes-okf
-  bundle_path: ~/.hermes/okf_memory
-  agent_id: hermes-alpha
-```
-
-> **Important:** `plugins.enabled` must be a YAML list, not a string. If you use `hermes config set plugins.enabled '["hermes-okf"]'`, it stores a JSON string which Hermes ignores. Edit `~/.hermes/config.yaml` directly to ensure it's a proper list.
-
-Run the setup wizard:
-
-```bash
-hermes memory setup
-```
-
-Hermes discovers plugins from `~/.hermes/plugins/`. `hermes-okf-install` creates the wrapper there so Hermes finds it. No code changes needed.
-
-### As a Standalone Library
-
-```python
-from hermes_okf import HermesOKFProvider
-
-provider = HermesOKFProvider()
-provider.on_session_start("session-1")
-provider.on_memory_write("user", "User prefers dark mode")
-provider.on_tool_call("search_web", {"query": "Python"}, "Found 5 results")
-provider.on_decision("Use Claude", "Better reasoning", tags=["model"])
-provider.on_session_end("session-1")
-```
-
----
-
-## Hermes Plugin CLI
-
-When installed as a Hermes plugin, these subcommands are available:
-
-```bash
-# Search your OKF memory
-hermes okf search "dark mode"
-
-# List stored concepts
-hermes okf list --type Decision
-
-# Save a snapshot
-hermes okf snapshot --note "Before deployment"
-
-# Restore from last snapshot
-hermes okf restore
-```
+Read the full architecture in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ---
 
@@ -147,85 +270,8 @@ agent.scrape_data("https://example.com")
 context = agent.with_context("python script", top_k=3)
 ```
 
----
-
-## Full Hermes Agent (State as OKF Bundle)
-
-For deeper integration, use `HermesAgent` — the entire agent state lives in the OKF bundle. The agent can be stopped, restarted, and resumed from its bundle alone.
-
-```python
-from hermes_okf import HermesAgent
-
-# Create or resume an agent
-agent = HermesAgent(
-    bundle_path="./hermes_agent_brain",
-    agent_id="hermes-alpha",
-    model="anthropic/claude-3.5-sonnet",
-)
-
-# Register tools with JSON schemas
-agent.register_tool("search_web", "Search the web", schema={"type": "object", ...})
-
-# Create and execute plans
-agent.create_plan("Research AI trends", ["Search", "Summarize", "Report"])
-agent.complete_step(0, result="Found 5 major trends")
-
-# Build LLM context automatically
-context = agent.build_context("What should I do next?")
-
-# Save snapshot — resume later from this exact state
-agent.snapshot()
-
-agent.end_session()
-```
-
-The agent bundle structure:
-```
-hermes_agent_brain/
-├── config/agent.md        # Identity, model, system prompt
-├── tools/*.md             # Tool definitions with schemas
-├── sessions/*.md          # Session records
-├── plans/*.md             # Active plans with checkable steps
-├── plans/archive/*.md     # Completed plans
-├── decisions/*.md         # Strategic decisions
-├── snapshots/*.md         # Full state snapshots
-└── index.md / log.md      # Bundle overview and activity log
-```
-
-Read the full integration guide: [`docs/HERMES_INTEGRATION.md`](docs/HERMES_INTEGRATION.md)
-
-For the universal provider usage, see: [`docs/HERMES_USERS.md`](docs/HERMES_USERS.md)
-
----
-
-## Standalone CLI
-
-```bash
-# Initialise a new OKF bundle
-hermes-okf init ./knowledge
-
-# Validate conformance
-hermes-okf validate --path ./knowledge
-
-# List concepts
-hermes-okf list --path ./knowledge
-
-# Show a concept
-hermes-okf show --path ./knowledge projects/my_project
-
-# Search
-hermes-okf search --path ./knowledge "ffmpeg GPU"
-
-# View log
-hermes-okf log --path ./knowledge
-
-# Append to log
-hermes-okf log-append --path ./knowledge "New decision made" --category Decision
-
-# Graph inspection
-hermes-okf graph-edges --path ./knowledge
-hermes-okf graph-neighbors --path ./knowledge projects/my_project
-```
+For the full HermesAgent (state-as-bundle), see [`docs/HERMES_INTEGRATION.md`](docs/HERMES_INTEGRATION.md).
+For the universal provider usage, see [`docs/HERMES_USERS.md`](docs/HERMES_USERS.md).
 
 ---
 
@@ -274,69 +320,6 @@ See `examples/rag_integration.py` for a complete example.
 
 ---
 
-## Architecture
-
-```
-┌─────────────────────────────────────┐
-│  CLI (hermes-okf)                   │
-├─────────────────────────────────────┤
-│  HermesOKFMemoryProvider            │  ← Hermes plugin (v0.3.1)
-│  HermesOKFProvider                  │  ← Universal provider (v0.3.0)
-│  HermesAgent / MemoryMixin          │  ← Agent integration
-├─────────────────────────────────────┤
-│  OKFBundle                          │  ← Core read/write API
-│  ├── Concept (dataclass)            │
-│  ├── GraphExtractor                 │
-│  ├── SearchIndex                    │
-│  └── OKFValidator                   │
-├─────────────────────────────────────┤
-│  Filesystem (markdown + YAML)       │  ← Persistent storage
-└─────────────────────────────────────┘
-```
-
-Read the full architecture in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
-
----
-
-## OKF Format
-
-This library implements the **Google Open Knowledge Format (OKF) v0.1** spec:
-
-- Every concept is a `.md` file with YAML frontmatter
-- Frontmatter **must** include a `type` field
-- Reserved files: `index.md` (directory), `log.md` (chronology)
-- Markdown links create implicit directed edges
-- Directory structure provides containment hierarchy
-- Tags create cross-cutting clusters
-
-> *"If you can `cat` a file, you can read OKF."*
-
----
-
-## Project Structure
-
-```
-hermes-okf/
-├── src/hermes_okf/          # Core library
-│   ├── bundle.py             # OKFBundle read/write
-│   ├── concept.py            # Concept dataclass
-│   ├── graph.py              # Graph extraction & traversal
-│   ├── search.py             # Full-text search & indexing
-│   ├── validators.py         # OKF conformance checking
-│   ├── memory.py             # Agent memory layer
-│   ├── agent.py              # Drop-in decorators
-│   ├── hermes.py             # HermesAgent full-state bundle
-│   ├── hermes_integration.py # Universal HermesOKFProvider (v0.3.0)
-│   ├── memory_plugin.py      # HermesOKFMemoryProvider plugin (v0.3.1)
-│   └── cli.py                # CLI entry point
-├── tests/                    # pytest suite
-├── examples/                 # Usage examples
-├── docs/                     # Architecture docs
-└── .github/workflows/        # CI/CD
-```
-
----
-
 ## Development
 
 ```bash
@@ -350,12 +333,69 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full guidelines.
 
 ---
 
+## Troubleshooting
+
+### `hermes-okf-install: command not found`
+
+The script is installed in your Python environment's `bin/` directory, which may not be in PATH. Use the full path:
+
+```bash
+# Find your Python environment
+which python
+# Then run:
+/path/to/python -m hermes_okf.install_plugin
+```
+
+Or if using a virtual environment:
+```bash
+source /path/to/venv/bin/activate
+hermes-okf-install
+```
+
+### `hermes memory setup` doesn't show hermes-okf
+
+1. Make sure you ran `hermes-okf-install` (creates `~/.hermes/plugins/hermes-okf/`)
+2. Check the plugin directory exists:
+   ```bash
+   ls ~/.hermes/plugins/hermes-okf/
+   # Should show: __init__.py  plugin.yaml
+   ```
+3. Ensure `plugins.enabled` in `~/.hermes/config.yaml` is a YAML list:
+   ```yaml
+   plugins:
+     enabled:
+       - hermes-okf
+   ```
+
+### `hermes okf show` shows wrong model
+
+As of v0.3.7, `HermesOKFMemoryProvider.initialize()` reads the actual Hermes model from `config.yaml` (top-level `model` or `llm.model`) and syncs it into the OKF `config/agent` concept. If you see an old model, restart your Hermes session to trigger re-initialization.
+
+### OKF bundle not found
+
+```bash
+hermes-okf init ~/.hermes/okf_memory
+```
+
+### Windows: filename errors
+
+Hermes-OKF uses Windows-safe filenames (`2026-06-15T10-30-00Z` instead of `2026-06-15T10:30:00Z`). If you see errors with older versions, upgrade:
+
+```bash
+pip install --upgrade hermes-okf
+```
+
+---
+
 ## Roadmap
 
-- [x] **Hermes plugin** (`HermesOKFMemoryProvider`) — MemoryProvider ABC, auto-discovered, `hermes memory setup` integration
+- [x] **Hermes plugin** (`HermesOKFMemoryProvider`) — MemoryProvider ABC, `hermes memory setup` integration
+- [x] **Plugin installer** (`hermes-okf-install`) — one-command registration in `~/.hermes/plugins/`
 - [x] **Universal Hermes memory provider** (`HermesOKFProvider`) — any Hermes agent can use it
 - [x] Two-memory model (hot buffer + cold OKF archive) with automatic flushing
 - [x] Hermes config system integration (`~/.hermes/hermes-okf.yaml`)
+- [x] Model sync — OKF config concept auto-updates from Hermes `config.yaml`
+- [x] `show` command — inspect any concept with metadata
 - [ ] Async I/O support for high-throughput agents
 - [ ] Multi-agent bundle merging and conflict resolution
 - [ ] Git-backed history with automatic diff summaries

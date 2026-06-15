@@ -13,19 +13,32 @@ Hermes OKF is built on a few simple principles:
 ## Layered Architecture
 
 ```
-┌─────────────────────────────────────┐
-│  CLI (hermes-okf)                   │  ← Human operator interface
-├─────────────────────────────────────┤
-│  HermesMemory / MemoryMixin         │  ← Agent integration layer
-├─────────────────────────────────────┤
-│  OKFBundle                          │  ← Core read/write API
-│  ├── Concept (dataclass)            │
-│  ├── GraphExtractor                 │
-│  ├── SearchIndex                    │
-│  └── OKFValidator                   │
-├─────────────────────────────────────┤
-│  Filesystem (markdown + YAML)       │  ← Persistent storage
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│  HUMAN INTERFACE                                              │
+│  ├─ hermes okf search|list|show|snapshot|restore  (Hermes CLI) │
+│  ├─ hermes-okf init|validate|search|show...     (Standalone)  │
+│  ├─ hermes-okf-install / hermes-okf-uninstall  (Plugin mgmt) │
+├─────────────────────────────────────────────────────────────┤
+│  HERMES PLUGIN LAYER                                          │
+│  ├─ HermesOKFMemoryProvider  ← MemoryProvider ABC            │
+│  ├─ plugin.py / cli_extension.py  ← CLI registration bridge    │
+│  ├─ install_plugin.py  ← Creates ~/.hermes/plugins/hermes-okf/│
+├─────────────────────────────────────────────────────────────┤
+│  UNIVERSAL PROVIDER                                           │
+│  ├─ HermesOKFProvider  ← Any Hermes agent can use it          │
+│  ├─ HermesAgent / MemoryMixin  ← Drop-in decorators           │
+│  ├─ HotMemoryBuffer  ← In-process fast write buffer           │
+├─────────────────────────────────────────────────────────────┤
+│  CORE OKF LAYER                                               │
+│  ├─ OKFBundle  ← File I/O, concept CRUD, logging            │
+│  ├─ Concept  ← Dataclass: type, title, body, metadata         │
+│  ├─ GraphExtractor  ← Link traversal, tag clustering          │
+│  ├─ SearchIndex  ← Full-text + fuzzy search                 │
+│  └─ OKFValidator  ← Conformance checking                      │
+├─────────────────────────────────────────────────────────────┤
+│  PERSISTENCE                                                  │
+│  └─ Filesystem (markdown + YAML frontmatter)                  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ## Module Responsibilities
@@ -40,6 +53,12 @@ Hermes OKF is built on a few simple principles:
 | `memory.py` | Agent-level semantics: sessions, decisions, observations, tool calls, context recall |
 | `agent.py` | Drop-in decorators (`@memorize_decision`, `@memorize_tool`, `@memorize_observation`) |
 | `cli.py` | `argparse` CLI for init, validate, show, search, log, graph inspection |
+| `cli_extension.py` | Builds `hermes okf <sub>` argparse tree for Hermes plugin integration |
+| `plugin.py` | Hermes general plugin registration bridge (`register(ctx)`) |
+| `install_plugin.py` | Creates `~/.hermes/plugins/hermes-okf/` wrapper for Hermes discovery |
+| `memory_plugin.py` | `HermesOKFMemoryProvider` — full MemoryProvider ABC implementation |
+| `hermes_integration.py` | `HermesOKFProvider` — universal Hermes memory provider |
+| `hermes.py` | `HermesAgent` — full-state agent whose entire state lives in an OKF bundle |
 
 ## OKF Conformance
 
@@ -58,3 +77,4 @@ Hermes OKF follows the **Google Open Knowledge Format v0.1** draft spec:
 - **Fuzzy search**: Install `rapidfuzz` for Levenshtein distance
 - **Graph export**: `GraphExtractor.to_networkx()` exports to NetworkX for analysis
 - **Custom validators**: Subclass `OKFValidator` and add rules
+- **Plugin installer**: `hermes-okf-install` creates the Hermes plugin wrapper; extend `install_plugin.py` for custom plugin metadata

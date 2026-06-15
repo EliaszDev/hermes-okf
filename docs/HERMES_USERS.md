@@ -12,64 +12,50 @@ This guide shows how to use `hermes-okf` as a **first-class memory provider** fo
 
 ```bash
 pip install hermes-okf
+```
 
-# Optional: for semantic search (RAG) over your memory
+### 2. Register the plugin
+
+```bash
+hermes-okf-install
+```
+
+Creates `~/.hermes/plugins/hermes-okf/` so Hermes discovers the plugin.
+
+### 3. Configure Hermes
+
+Edit `~/.hermes/config.yaml`:
+
+```yaml
+plugins:
+  enabled:
+    - hermes-okf
+
+memory:
+  provider: hermes-okf
+  bundle_path: ~/.hermes/okf_memory
+  agent_id: hermes-alpha
+```
+
+> **Important:** `plugins.enabled` must be a YAML list, not a string.
+
+### 4. Run the setup wizard
+
+```bash
+hermes memory setup
+```
+
+Then start a new Hermes session to activate.
+
+---
+
+## Optional: Install with RAG support
+
+```bash
 pip install hermes-okf[rag]
 ```
 
-### 2. Create config
-
-Create `~/.hermes/hermes-okf.yaml`:
-
-```yaml
-bundle_path: ~/.hermes/okf_memory
-agent_id: hermes
-auto_snapshot: true
-log_tool_calls: true
-log_decisions: true
-use_hot_memory: true
-hot_memory_max: 50
-enable_rag: false
-rag_model: openai/text-embedding-3-small
-```
-
-Or use environment variables:
-
-```bash
-export HERMES_OKF_BUNDLE_PATH="~/.hermes/okf_memory"
-export HERMES_OKF_AUTO_SNAPSHOT="true"
-export HERMES_OKF_ENABLE_RAG="false"
-```
-
-### 3. Use in your Python code
-
-```python
-from hermes_okf import HermesOKFProvider
-
-provider = HermesOKFProvider()
-
-# Session lifecycle
-provider.on_session_start("my-session")
-
-# Hermes memory writes
-provider.on_memory_write("memory", "User prefers Python over Go")
-provider.on_memory_write("user", "Developer in Berlin, UTC+1")
-
-# Tool calls
-provider.on_tool_call("search_web", {"query": "Python 3.14"}, "Found 5 results")
-
-# Decisions
-provider.on_decision(
-    "Use Claude for reasoning tasks",
-    "Better long-context handling than GPT-4o",
-    tags=["model-selection"]
-)
-
-# End session
-provider.on_session_end("my-session")
-```
-
-Your OKF bundle is now at `~/.hermes/okf_memory/` with structured, typed, human-readable knowledge.
+For semantic search (ChromaDB vector search) over your OKF bundle.
 
 ---
 
@@ -88,6 +74,7 @@ Your OKF bundle is now at `~/.hermes/okf_memory/` with structured, typed, human-
 | **Search** | Full-text search over all concepts |
 | **RAG** | Semantic vector search (optional, requires `[rag]` extra) |
 | **Git-friendly** | `git diff` your agent's memory |
+| **Model sync** | OKF config auto-updates from Hermes `config.yaml` (v0.3.7+) |
 
 ---
 
@@ -243,6 +230,29 @@ for r in results:
 
 ## CLI Commands
 
+### Hermes Plugin Commands (hermes okf)
+
+```bash
+# Search
+hermes okf search "deployment strategy"
+
+# List concepts
+hermes okf list --type Decision
+
+# Show a concept (v0.3.4+)
+hermes okf show config/agent
+hermes okf show sessions/2026-06-14T22-14-58Z
+hermes okf show sessions/2026-06-14T22-14-58Z --raw
+
+# Snapshot
+hermes okf snapshot --note "Before big deploy"
+
+# Restore
+hermes okf restore
+```
+
+### Standalone Commands (hermes-okf)
+
 ```bash
 # Initialise bundle
 hermes-okf init ~/.hermes/okf_memory
@@ -278,7 +288,7 @@ hermes-okf --path ~/.hermes/okf_memory context "What did we decide?"
 |-----|---------|-------------|
 | `bundle_path` | `~/.hermes/okf_memory` | Where the OKF bundle lives |
 | `agent_id` | `hermes` | Identifier for this agent |
-| `model` | `openai/gpt-4o` | Default LLM model |
+| `model` | (from Hermes config) | Auto-synced from `config.yaml` (v0.3.7+) |
 | `auto_snapshot` | `true` | Snapshot on session start/end |
 | `snapshot_on_tool_call` | `false` | Snapshot on every tool call |
 | `log_tool_calls` | `true` | Record tool calls to OKF |
@@ -299,10 +309,11 @@ hermes-okf --path ~/.hermes/okf_memory context "What did we decide?"
 | **Graph** | ❌ No links | ✅ Markdown links = directed edges |
 | **Search** | FTS5 keyword only | ✅ Full-text + semantic (optional) |
 | **Tool schemas** | ❌ In code only | ✅ Stored as readable concepts |
-| **Plan tracking** | ❌ No native plans | ✅ 9-step plans with progress |
+| **Plan tracking** | ❌ No native plans | ✅ Checkable steps with progress |
 | **Resume** | ❌ No snapshots | ✅ Full state save/restore |
 | **Version control** | ❌ Not git-friendly | ✅ `git diff` every decision |
 | **Cross-agent** | ❌ Isolated per agent | ✅ Copy bundle, resume elsewhere |
+| **Model tracking** | ❌ Static | ✅ Auto-sync from Hermes config (v0.3.7+) |
 
 ---
 

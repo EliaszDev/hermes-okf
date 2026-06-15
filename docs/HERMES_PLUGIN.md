@@ -18,12 +18,13 @@ Hermes' default memory is **small, hot, and curated** — two flat text files (`
 - **State snapshots** — save and resume full agent state
 - **Tool registry** — JSON schemas stored as readable concepts
 - **Cross-session recall** — searchable, traversable session history
+- **Model sync** — OKF config auto-updates from Hermes `config.yaml` (v0.3.7+)
 
 **The two systems coexist.** Hermes keeps its fast, bounded working memory. OKF handles structured, long-term knowledge.
 
 ---
 
-## Installation
+## Installation (v0.4.1+)
 
 ### 1. Install hermes-okf
 
@@ -31,249 +32,78 @@ Hermes' default memory is **small, hot, and curated** — two flat text files (`
 pip install hermes-okf
 ```
 
-Or install from source:
+### 2. Register the plugin in Hermes
 
 ```bash
-git clone https://github.com/EliaszDev/hermes-okf.git
-cd hermes-okf
-pip install -e .
+hermes-okf-install
 ```
 
-### 2. Create the Hermes-OKF configuration
+This creates `~/.hermes/plugins/hermes-okf/` with:
+- `plugin.yaml` — manifest that Hermes reads
+- `__init__.py` — imports `HermesOKFMemoryProvider`
 
-Create `~/.hermes/hermes-okf.json`:
+> **Why this is needed:** Hermes uses filesystem-based discovery (`~/.hermes/plugins/`), not `importlib.metadata` entry points. The `hermes.memory_providers` entry point exists but is never read by Hermes. The `hermes-okf-install` command creates the wrapper directory so Hermes finds the plugin.
 
-```json
-{
-  "bundle_path": "~/.hermes/okf_memory",
-  "agent_id": "hermes",
-  "auto_snapshot": true,
-  "snapshot_on_plan_complete": true,
-  "log_decisions": true,
-  "log_tool_calls": true
-}
-```
-
-| Option | Description |
-|--------|-------------|
-| `bundle_path` | Where the OKF knowledge bundle lives |
-| `agent_id` | Identifier for this agent instance |
-| `auto_snapshot` | Save state snapshot after every session |
-| `snapshot_on_plan_complete` | Snapshot when a plan finishes |
-| `log_decisions` | Record model/strategy decisions to OKF |
-| `log_tool_calls` | Record tool usage to OKF |
-
-### 3. Register the plugin in Hermes config
+### 3. Configure Hermes
 
 Edit `~/.hermes/config.yaml`:
 
 ```yaml
-memory:
-  memory_enabled: true
-  user_profile_enabled: true
-
 plugins:
-  hermes_okf:
-    enabled: true
-    config_path: ~/.hermes/hermes-okf.json
+  enabled:
+    - hermes-okf
 
-hooks:
-  on_session_start:
-    - hermes_okf.session_start
-  on_session_end:
-    - hermes_okf.session_end
-  on_memory_write:
-    - hermes_okf.memory_write
-  on_tool_call:
-    - hermes_okf.tool_call
-  on_plan_complete:
-    - hermes_okf.plan_complete
+memory:
+  provider: hermes-okf
+  bundle_path: ~/.hermes/okf_memory
+  agent_id: hermes-alpha
 ```
 
-> **Note:** Hermes' hook system is event-based. If your Hermes version doesn't support custom hooks yet, use the Python integration below.
+> **Important:** `plugins.enabled` must be a YAML list, not a string. If you use `hermes config set plugins.enabled '["hermes-okf"]'`, it stores a JSON string which Hermes ignores. Edit `~/.hermes/config.yaml` directly to ensure it's a proper list.
+
+### 4. Activate
+
+```bash
+hermes memory setup
+```
+
+Then start a new Hermes session:
+
+```bash
+hermes
+```
+
+### Uninstall
+
+```bash
+hermes-okf-uninstall
+```
+
+Removes the plugin wrapper from `~/.hermes/plugins/` but does not delete your OKF bundle.
 
 ---
 
-## Python Integration (Recommended)
+## Hermes Plugin CLI Commands
 
-If Hermes' native hook system isn't available in your version, use this Python bridge to connect Hermes events to OKF.
-
-### Create `~/.hermes/skills/hermes-okf-bridge.py`
-
-```python
-"""Hermes-OKF bridge skill — wires Hermes events into OKF memory."""
-
-import os
-import json
-from pathlib import Path
-from hermes_okf.hermes import HermesAgent
-
-# Load config
-CONFIG_PATH = Path(os.environ.get("HERMES_HOME", "~/.hermes")).expanduser() / "hermes-okf.json"
-
-if CONFIG_PATH.exists():
-    config = json.loads(CONFIG_PATH.read_text())
-else:
-    config = {
-        "bundle_path": str(Path("~/.hermes/okf_memory").expanduser()),
-        "agent_id": "hermes",
-    }
-
-# Initialize the OKF-backed agent
-agent = HermesAgent(
-    bundle_path=config["bundle_path"],
-    agent_id=config["agent_id"],
-)
-
-# --- Hermes hook handlers ---
-
-def on_session_start(session_id: str, **kwargs) -> None:
-    """Called when Hermes starts a new session."""
-    agent.start_session(session_id)
-    if config.get("auto_snapshot"):
-        agent.snapshot(note=f"Session {session_id} started")
-
-
-def on_session_end(session_id: str, **kwargs) -> None:
-    """Called when Hermes ends a session."""
-    agent.end_session()
-    if config.get("auto_snapshot"):
-        agent.snapshot(note=f"Session {session_id} ended")
-
-
-def on_memory_write(target: str, content: str, **kwargs) -> None:
-    """Called when Hermes writes to MEMORY.md or USER.md.
-
-    Maps flat Hermes memory entries into typed OKF concepts.
-    """
-    if target == "memory":
-        # Agent's personal notes → Observation concept
-        agent.memory.record_observation(content, category="Memory")
-    elif target == "user":
-        # User profile → UserProfile concept
-        agent.memory.bundle.write_concept(
-            f"context/user_profile_{agent._now_date()}",
-            body=f"# User Profile\n\n{content}",
-            type="UserProfile",
-            title="User Profile",
-            tags=["user", "profile"],
-        )
-
-
-def on_tool_call(tool_name: str, args: dict, result: str, **kwargs) -> None:
-    """Called when Hermes invokes a tool."""
-    if not config.get("log_tool_calls"):
-        return
-    agent.memory.record_tool_call(
-        tool_name,
-        f"args={args} -> {result[:200]}",
-    )
-    # Also ensure tool is registered in OKF
-    if not agent.get_tool(tool_name):
-        agent.register_tool(
-            name=tool_name,
-            description=f"Tool used by Hermes agent",
-        )
-
-
-def on_plan_complete(plan: str, steps: list, **kwargs) -> None:
-    """Called when Hermes completes a multi-step plan."""
-    plan_id = agent.create_plan(plan, steps)
-    for i, _ in enumerate(steps):
-        agent.complete_step(i, result="Completed via Hermes")
-    if config.get("snapshot_on_plan_complete"):
-        agent.snapshot(note=f"Plan completed: {plan}")
-
-
-def on_decision(decision: str, rationale: str, **kwargs) -> None:
-    """Called when Hermes makes a strategic decision."""
-    if not config.get("log_decisions"):
-        return
-    agent.memory.record_decision(decision, rationale=rationale)
-
-
-# --- Hermes skill interface ---
-# Hermes can call these via /skill hermes-okf-bridge or RPC
-
-SKILL_NAME = "hermes-okf-bridge"
-SKILL_VERSION = "0.2.0"
-
-
-def skill_status():
-    """Return OKF bundle status."""
-    return {
-        "bundle_path": config["bundle_path"],
-        "sessions": len(agent.list_sessions()),
-        "tools": len(agent.list_tools()),
-        "plans": len(agent.memory.bundle.list_concepts("plans")),
-    }
-
-
-def skill_context(query: str, top_k: int = 5):
-    """Build LLM context from OKF for a given query."""
-    return agent.build_context(query, top_k=top_k)
-
-
-def skill_recall(tag: str):
-    """Recall all OKF concepts with a given tag."""
-    return [c.id for c in agent.memory.recall_by_tag(tag)]
-
-
-def skill_snapshot(note: str = ""):
-    """Save a manual snapshot."""
-    agent.snapshot(note=note)
-    return {"snapshot": "saved"}
-
-
-def skill_restore():
-    """Restore agent from last snapshot."""
-    meta = agent.restore()
-    return {"restored": meta}
-```
-
-### Register the skill in Hermes
-
-Create `~/.hermes/skills/hermes-okf-bridge/skill.yaml`:
-
-```yaml
-name: hermes-okf-bridge
-version: 0.2.0
-description: Bridge Hermes events to OKF structured memory
-author: EliaszDev
-entry: hermes-okf-bridge.py
-commands:
-  - name: status
-    description: Show OKF bundle status
-    handler: skill_status
-  - name: context
-    description: Build LLM context from OKF
-    handler: skill_context
-    args:
-      - query
-      - top_k
-  - name: recall
-    description: Recall concepts by tag
-    handler: skill_recall
-    args:
-      - tag
-  - name: snapshot
-    description: Save state snapshot
-    handler: skill_snapshot
-    args:
-      - note
-  - name: restore
-    description: Restore from last snapshot
-    handler: skill_restore
-```
-
-Now use it from Hermes CLI or messaging:
+When installed as a Hermes plugin, these subcommands are available:
 
 ```bash
-/hermes-okf-bridge status
-/hermes-okf-bridge context "What did we decide about GPU?"
-/hermes-okf-bridge recall decision
-/hermes-okf-bridge snapshot "Before big refactor"
-/hermes-okf-bridge restore
+# Search your OKF memory
+hermes okf search "dark mode"
+
+# List stored concepts
+hermes okf list --type Decision
+
+# Show full content of a concept (v0.3.4+)
+hermes okf show config/agent
+hermes okf show sessions/2026-06-14T22-14-58Z
+hermes okf show sessions/2026-06-14T22-14-58Z --raw  # no metadata
+
+# Save a snapshot
+hermes okf snapshot --note "Before deployment"
+
+# Restore from last snapshot
+hermes okf restore
 ```
 
 ---
@@ -324,24 +154,32 @@ Hermes: Creates Plan concept in OKF with 3 steps
 # As Hermes completes each step, OKF updates progress
 ```
 
-### 5. End session — OKF snapshots state
+### 5. Inspect memory
 
 ```bash
-/hermes-okf-bridge snapshot "End of day checkpoint"
+hermes okf show config/agent        # See your config (model, system prompt)
+hermes okf list --type Decision     # See all decisions
+hermes okf search "Python"           # Full-text search
+```
+
+### 6. End session — OKF snapshots state
+
+```bash
+hermes okf snapshot "End of day checkpoint"
 # Full agent state saved to snapshots/YYYY-MM-DDTHH-MM-SSZ.md
 ```
 
-### 6. Resume tomorrow — restore from OKF
+### 7. Resume tomorrow
 
 ```bash
 hermes
-/hermes-okf-bridge restore
+hermes okf restore
 # Agent resumes with config, last session, active plan, and all tools
 ```
 
 ---
 
-## CLI Commands (from `hermes-okf` package)
+## Standalone CLI Commands
 
 Even without the Hermes bridge, you can inspect the OKF bundle:
 
@@ -371,23 +209,37 @@ hermes-okf context --path ~/.hermes/okf_memory "What should I prioritize?"
 
 ## Troubleshooting
 
+### "hermes-okf-install: command not found"
+
+The script is installed in your Python environment's `bin/` directory. If it's not in PATH, use the module form:
+
+```bash
+python -m hermes_okf.install_plugin
+```
+
+### "Hermes doesn't see my plugin"
+
+1. Check the plugin directory exists:
+   ```bash
+   ls ~/.hermes/plugins/hermes-okf/
+   # Should show: __init__.py  plugin.yaml
+   ```
+2. Ensure `plugins.enabled` in `~/.hermes/config.yaml` is a YAML list (not a JSON string)
+3. Restart Hermes
+
 ### "OKF bundle not found"
 
 ```bash
 hermes-okf init ~/.hermes/okf_memory
 ```
 
-### "Hermes doesn't see my skill"
+### "Config shows wrong model"
 
-Make sure the skill YAML is at `~/.hermes/skills/hermes-okf-bridge/skill.yaml` and the Python file is in the same directory. Run `hermes skills reload`.
-
-### "OKF concepts are not showing up in Hermes context"
-
-Hermes' default memory injection is separate from OKF. Use `/hermes-okf-bridge context "query"` to pull OKF knowledge into the conversation explicitly. Or configure the bridge to inject a condensed OKF summary into Hermes' working memory on session start.
+As of v0.3.7, the model is synced from Hermes `config.yaml` on every session start. Restart Hermes to refresh.
 
 ### "Windows: filename errors"
 
-Hermes-OKF uses Windows-safe filenames (`2026-06-15T10-30-00Z` instead of `2026-06-15T10:30:00Z`). If you see errors with older versions, upgrade:
+Hermes-OKF uses Windows-safe filenames. If you see errors with older versions, upgrade:
 
 ```bash
 pip install --upgrade hermes-okf
