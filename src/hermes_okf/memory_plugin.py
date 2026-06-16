@@ -190,9 +190,7 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
             },
         ]
 
-    def handle_tool_call(
-        self, tool_name: str, args: dict[str, Any], **kwargs: Any
-    ) -> str:
+    def handle_tool_call(self, tool_name: str, args: dict[str, Any], **kwargs: Any) -> str:
         """Dispatch tool calls from the agent to the OKF provider."""
         if self._provider is None:
             return json.dumps({"error": "OKF provider not initialized"})
@@ -209,13 +207,15 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
                     concept = self._provider.agent.memory.bundle.read_concept(path)
                     if concept is None:
                         continue
-                    items.append({
-                        "id": concept.id,
-                        "type": concept.type or "unknown",
-                        "title": concept.title or concept.id,
-                        "body": (concept.body or "")[:500],
-                        "score": round(score, 3),
-                    })
+                    items.append(
+                        {
+                            "id": concept.id,
+                            "type": concept.type or "unknown",
+                            "title": concept.title or concept.id,
+                            "body": (concept.body or "")[:500],
+                            "score": round(score, 3),
+                        }
+                    )
                 return json.dumps({"results": items, "count": len(items)})
             except Exception as e:
                 logger.warning("search_memory failed: %s", e)
