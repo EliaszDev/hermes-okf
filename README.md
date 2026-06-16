@@ -1,6 +1,6 @@
 # Hermes OKF (Open Knowledge Format) — Universal Memory for AI Agents
 
-[![PyPI](https://img.shields.io/pypi/v/hermes-okf.svg)](https://pypi.org/project/hermes-okf/)
+[![PyPI](https://img.shields.io/pypi/v/hermes-okf.svg?cacheSeconds=1)](https://pypi.org/project/hermes-okf/)
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
