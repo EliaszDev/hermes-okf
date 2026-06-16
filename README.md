@@ -56,7 +56,7 @@ Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
 Start Hermes and select `hermes-okf` from the interactive setup:
 
 ```bash
-&gt; hermes memory setup
+hermes memory setup
 ```
 # Select hermes-okf from the list
 
