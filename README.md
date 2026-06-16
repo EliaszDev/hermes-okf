@@ -4,7 +4,7 @@
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OKF](https://img.shields.io/badge/OKF-v0.4.6-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
+[![OKF](https://img.shields.io/badge/OKF-v0.5.0-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
 > **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. `pip install hermes-okf && hermes-okf-install` — two commands and you're live. The install command auto-configures `~/.hermes/config.yaml` so `hermes memory setup` finds the plugin immediately. `hermes okf search|list|show|snapshot|restore` work out of the box.**
 
@@ -363,6 +363,32 @@ pip install --upgrade hermes-okf
 
 ---
 
+## What's New in v0.5.0
+
+**Critical memory provider integration fix.** Previous versions shipped the OKF CLI and plugin skeleton, but the agent-side integration was broken — `handle_tool_call()` raised `NotImplementedError`, `queue_prefetch()` was a no-op, and `system_prompt_block()` didn't instruct the agent to use memory tools. Users had to manually edit their system prompt ("soul md") to get data retrieval working.
+
+### Fixed in v0.5.0
+
+| Component | Before (v0.4.x) | After (v0.5.0) |
+|-----------|------------------|-----------------|
+| `handle_tool_call()` | ❌ Not implemented → `NotImplementedError` | ✅ Dispatches `search_memory` + `snapshot_memory` with JSON results |
+| `queue_prefetch()` | ❌ No-op → no background warming | ✅ Background thread prefetch warming |
+| `system_prompt_block()` | Passive ("inspect memory at...") | Active ("memories are auto-injected, use search_memory to...") |
+| `prefetch()` | No error handling → crashes on broken bundles | ✅ try/except with graceful fallback |
+| Tool descriptions | Generic | Descriptive ("Use when you need to recall past decisions...") |
+
+**What this means:** A fresh `pip install hermes-okf && hermes-okf-install` now works out of the box. The agent gets told about auto-injected memories, can call `search_memory`/`snapshot_memory` tools without crashing, and prefetch is warmed in the background.
+
+### Upgrading
+
+```bash
+pip install --upgrade hermes-okf
+```
+
+No configuration changes needed — the plugin automatically uses the new integration.
+
+---
+
 ## Roadmap
 
 | # | Feature | Status | Priority | Notes |
@@ -382,10 +408,10 @@ pip install --upgrade hermes-okf
 | 13 | **Hermes orchestration** | 🚧 Not started | P3 | Single agent per bundle. No multi-agent coordinator. |
 
 **Legend:**
-- ✅ Shipped — in `hermes-okf` v0.4.5
-- 🚧 Not started — on the backlog; not planned for 0.4.x
+- ✅ Shipped — in `hermes-okf` v0.5.0
+- 🚧 Not started — on the backlog; not planned for 0.x
 
-**Current focus:** Bug fixes and Hermes CLI stability (0.4.x). Roadmap items 8–13 are for a 1.0 release.
+**Current focus:** v0.5.0 ships the critical memory provider integration fix — `handle_tool_call()`, `queue_prefetch()`, and improved `system_prompt_block()` now work out of the box. Roadmap items 8–13 are for a 1.0 release.
 
 ---
 
