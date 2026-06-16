@@ -9,12 +9,17 @@ Reference: https://github.com/NousResearch/hermes-agent/blob/main/agent/memory_p
 
 from __future__ import annotations
 
+import json
+import logging
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import hermes_okf
 from hermes_okf.hermes_integration import HermesOKFConfig, HermesOKFProvider
+
+logger = logging.getLogger(__name__)
 
 # The Hermes MemoryProvider ABC interface (imported if available)
 try:
@@ -132,24 +137,29 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
     def get_tool_schemas(self) -> list[dict[str, Any]]:
         """Return tool schemas for memory operations.
 
-        Exposes: search_memory, snapshot_memory, restore_memory
+        Exposes: search_memory, snapshot_memory
         """
         return [
             {
                 "type": "function",
                 "function": {
                     "name": "search_memory",
-                    "description": "Search the agent's OKF memory bundle for relevant concepts.",
+                    "description": (
+                        "Search the agent's persistent OKF memory for relevant "
+                        "concepts, decisions, observations, and prior context. "
+                        "Use this when you need to recall past sessions, "
+                        "decisions, or stored knowledge."
+                    ),
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "query": {
                                 "type": "string",
-                                "description": "Search query",
+                                "description": "Search query — keywords or natural language",
                             },
                             "top_k": {
                                 "type": "integer",
-                                "description": "Number of results",
+                                "description": "Number of results to return",
                                 "default": 5,
                             },
                         },
@@ -161,13 +171,17 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
                 "type": "function",
                 "function": {
                     "name": "snapshot_memory",
-                    "description": "Save a full memory snapshot to the OKF bundle.",
+                    "description": (
+                        "Save a point-in-time snapshot of the agent's OKF "
+                        "memory bundle. Use before risky operations or at "
+                        "natural breakpoints."
+                    ),
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "note": {
                                 "type": "string",
-                                "description": "Snapshot note",
+                                "description": "Human-readable note about why this snapshot was taken",
                                 "default": "",
                             },
                         },
@@ -175,6 +189,48 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
                 },
             },
         ]
+
+    def handle_tool_call(
+        self, tool_name: str, args: dict[str, Any], **kwargs: Any
+    ) -> str:
+        """Dispatch tool calls from the agent to the OKF provider."""
+        if self._provider is None:
+            return json.dumps({"error": "OKF provider not initialized"})
+
+        if tool_name == "search_memory":
+            query = args.get("query", "")
+            top_k = args.get("top_k", 5)
+            if not query:
+                return json.dumps({"error": "query is required"})
+            try:
+                results = self._provider.search(query, top_k=top_k)
+                items = []
+                for path, score in results:
+                    concept = self._provider.agent.memory.bundle.read_concept(path)
+                    if concept is None:
+                        continue
+                    items.append({
+                        "id": concept.id,
+                        "type": concept.type or "unknown",
+                        "title": concept.title or concept.id,
+                        "body": (concept.body or "")[:500],
+                        "score": round(score, 3),
+                    })
+                return json.dumps({"results": items, "count": len(items)})
+            except Exception as e:
+                logger.warning("search_memory failed: %s", e)
+                return json.dumps({"error": str(e)})
+
+        elif tool_name == "snapshot_memory":
+            note = args.get("note", "")
+            try:
+                self._provider.agent.memory.bundle.snapshot(note=note)
+                return json.dumps({"status": "ok", "note": note})
+            except Exception as e:
+                logger.warning("snapshot_memory failed: %s", e)
+                return json.dumps({"error": str(e)})
+
+        return json.dumps({"error": f"Unknown tool: {tool_name}"})
 
     # -- Core lifecycle (optional ABC, but we implement) -----------------------
 
@@ -218,13 +274,20 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
         if self._provider is None or not query:
             return ""
 
-        results = self._provider.search(query, top_k=5)
+        try:
+            results = self._provider.search(query, top_k=5)
+        except Exception as e:
+            logger.debug("prefetch search failed: %s", e)
+            return ""
         if not results:
             return ""
 
         lines = ["## Relevant Memory (from OKF bundle)", ""]
         for path, score in results:
-            concept = self._provider.agent.memory.bundle.read_concept(path)
+            try:
+                concept = self._provider.agent.memory.bundle.read_concept(path)
+            except Exception:
+                continue
             if concept is None:
                 continue
             title = concept.title or concept.id
@@ -235,6 +298,20 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
             lines.append("")
 
         return "\n".join(lines)
+
+    def queue_prefetch(self, query: str, *, session_id: str = "") -> None:
+        """Pre-warm the search cache for the next turn in a background thread."""
+        if self._provider is None or not query:
+            return
+
+        def _warm() -> None:
+            try:
+                self._provider.search(query, top_k=5)
+            except Exception as e:
+                logger.debug("queue_prefetch warm-up failed: %s", e)
+
+        t = threading.Thread(target=_warm, daemon=True, name="okf-prefetch")
+        t.start()
 
     def shutdown(self) -> None:
         """Clean shutdown — flush buffer and end session."""
@@ -269,11 +346,16 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
             self._provider.on_memory_write(target, content)
 
     def system_prompt_block(self) -> str:
-        """Static info about the OKF memory provider."""
+        """Static info injected into the system prompt."""
         return (
             "Memory is persisted via OKF (Open Knowledge Format) — "
-            "a directory of markdown files with YAML frontmatter. "
-            "You can inspect memory at ~/.hermes/okf_memory/"
+            "a directory of markdown files with YAML frontmatter.\n"
+            "Relevant memories are automatically injected into context "
+            "before each turn. Use search_memory to query your OKF bundle "
+            "explicitly when you need to recall past decisions, "
+            "observations, or stored knowledge.\n"
+            "Use snapshot_memory to save a point-in-time snapshot.\n"
+            f"Bundle location: {self._hermes_home or '~/.hermes'}/okf_memory/"
         )
 
     # -- Config for `hermes memory setup` ------------------------------------
