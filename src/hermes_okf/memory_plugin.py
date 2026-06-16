@@ -224,7 +224,8 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
         elif tool_name == "snapshot_memory":
             note = args.get("note", "")
             try:
-                self._provider.agent.memory.bundle.snapshot(note=note)
+                assert self._provider is not None
+                self._provider.snapshot(note=note)
                 return json.dumps({"status": "ok", "note": note})
             except Exception as e:
                 logger.warning("snapshot_memory failed: %s", e)
@@ -304,9 +305,11 @@ class HermesOKFMemoryProvider(_HermesMemoryProvider):  # type: ignore[misc]
         if self._provider is None or not query:
             return
 
+        provider = self._provider  # capture for mypy narrowing
+
         def _warm() -> None:
             try:
-                self._provider.search(query, top_k=5)
+                provider.search(query, top_k=5)
             except Exception as e:
                 logger.debug("queue_prefetch warm-up failed: %s", e)
 
