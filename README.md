@@ -51,19 +51,14 @@ Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
 
 > **What this does:** Creates `~/.hermes/plugins/hermes-okf/` and auto-updates `~/.hermes/config.yaml` to add `hermes-okf` to `plugins.enabled` and set `memory.provider`. Hermes finds the plugin on next startup.
 
-### Step 3 — Start Hermes
+### Step 3 — Activate the memory provider
+
+Start Hermes and select `hermes-okf` from the interactive setup:
 
 ```bash
-hermes
+&gt; hermes memory setup
 ```
-
-The plugin activates on first session start. Your OKF bundle is created at `~/.hermes/okf_memory/` automatically.
-
-**Optional:** Run the setup wizard to customize bundle path and agent ID:
-
-```bash
-hermes memory setup
-```
+# Select hermes-okf from the list
 
 ### Uninstall
 
