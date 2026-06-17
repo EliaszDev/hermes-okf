@@ -10,7 +10,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
 authors = [
-    { name = "EliaszDev", email = "eliasz@example.com" },
+    { name = "EliaszDev", email = "to.eliasz@icloud.com" },
 ]
 keywords = [
     "hermes",
