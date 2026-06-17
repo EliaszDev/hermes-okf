@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.4.6] - 2026-06-15
+## [0.5.0] - 2026-06-15
+
+### Changed
+- **Unified CLI**: `hermes-okf install-plugin` and `hermes-okf uninstall-plugin` are now the only documented installation method. The standalone `hermes-okf-install` and `hermes-okf-uninstall` entry points have been removed from `pyproject.toml` to eliminate PATH confusion and provide a single, consistent CLI interface.
+- All documentation updated to use the subcommand form exclusively.
 
 ### Fixed
 - CLI `--path` now works after subcommands (`hermes-okf validate --path /tmp/test`). Added `--version` flag.

@@ -57,7 +57,7 @@ Metadata:
   title: hermes Configuration
   model: kimi/k2.6
   system_prompt: You are a helpful, autonomous Hermes agent.
-  version: 0.4.6
+  version: 0.5.0
   timestamp: 2026-06-14T22:14:58Z
 ---
 # Agent Configuration
@@ -221,22 +221,22 @@ hermes-okf tools --path ./knowledge
 
 ## Plugin Management Commands
 
-### `hermes-okf-install`
+### `hermes-okf install-plugin`
 
 Register hermes-okf as a Hermes plugin.
 
 ```bash
-hermes-okf-install
+hermes-okf install-plugin
 ```
 
 Creates `~/.hermes/plugins/hermes-okf/` with the plugin wrapper.
 
-### `hermes-okf-uninstall`
+### `hermes-okf uninstall-plugin`
 
 Remove hermes-okf from Hermes.
 
 ```bash
-hermes-okf-uninstall
+hermes-okf uninstall-plugin
 ```
 
 Removes `~/.hermes/plugins/hermes-okf/`. Does not delete your OKF bundle.

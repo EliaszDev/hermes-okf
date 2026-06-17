@@ -24,7 +24,7 @@ Hermes' default memory is **small, hot, and curated** — two flat text files (`
 
 ---
 
-## Installation (v0.4.6+)
+## Installation (v0.5.0+)
 
 ### 1. Install hermes-okf
 
@@ -35,7 +35,7 @@ pip install hermes-okf
 ### 2. Register the plugin
 
 ```bash
-hermes-okf-install
+hermes-okf install-plugin
 ```
 
 This does **everything automatically**:
@@ -43,7 +43,7 @@ This does **everything automatically**:
 1. **Creates** `~/.hermes/plugins/hermes-okf/` with `plugin.yaml` + `__init__.py`
 2. **Updates** `~/.hermes/config.yaml` to add `hermes-okf` to `plugins.enabled` and set `memory.provider`
 
-> **Why this is needed:** Hermes uses filesystem-based discovery (`~/.hermes/plugins/`), not `importlib.metadata` entry points. The `hermes.memory_providers` entry point exists but is never read by Hermes. The `hermes-okf-install` command creates the wrapper directory and configures Hermes so it finds the plugin immediately.
+> **Why this is needed:** Hermes uses filesystem-based discovery (`~/.hermes/plugins/`), not `importlib.metadata` entry points. The `hermes.memory_providers` entry point exists but is never read by Hermes. The `hermes-okf install-plugin` command creates the wrapper directory and configures Hermes so it finds the plugin immediately.
 
 ### 3. Start Hermes
 
@@ -68,7 +68,7 @@ hermes
 ### Uninstall
 
 ```bash
-hermes-okf-uninstall
+hermes-okf uninstall-plugin
 ```
 
 Removes the plugin wrapper from `~/.hermes/plugins/` but does not delete your OKF bundle.
@@ -201,12 +201,12 @@ hermes-okf context --path ~/.hermes/okf_memory "What should I prioritize?"
 
 ## Troubleshooting
 
-### "hermes-okf-install: command not found"
+### "hermes-okf install-plugin" is not found
 
-The script is installed in your Python environment's `bin/` directory. If it's not in PATH, use the module form:
+If the `hermes-okf` CLI is not in PATH, use the module form:
 
 ```bash
-python -m hermes_okf.install_plugin
+python -m hermes_okf.cli install-plugin
 ```
 
 ### "Hermes doesn't see my plugin"

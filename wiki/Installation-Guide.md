@@ -28,7 +28,7 @@ To verify the installation:
 
 ```bash
 python -c "import hermes_okf; print(hermes_okf.__version__)"
-# Expected: 0.4.6 or higher
+# Expected: 0.5.0 or higher
 ```
 
 ---
@@ -36,7 +36,7 @@ python -c "import hermes_okf; print(hermes_okf.__version__)"
 ## Step 2 — Register the Plugin
 
 ```bash
-hermes-okf-install
+hermes-okf install-plugin
 ```
 
 Expected output:
@@ -53,7 +53,7 @@ Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
 `~/.hermes/plugins/hermes-okf/plugin.yaml` — Manifest that Hermes reads:
 ```yaml
 name: hermes-okf
-version: 0.4.6
+version: 0.5.0
 description: "OKF-based memory provider for Hermes agent..."
 hooks:
   - on_session_end
@@ -76,7 +76,7 @@ Reads `~/.hermes/config.yaml` and adds:
 
 Hermes uses **filesystem-based discovery** (`~/.hermes/plugins/`), not `importlib.metadata` entry points. The `hermes.memory_providers` entry point in `pyproject.toml` exists but is never read by Hermes core.
 
-The `hermes-okf-install` command creates the wrapper directory and configures Hermes so it finds the plugin immediately.
+The `hermes-okf install-plugin` command creates the wrapper directory and configures Hermes so it finds the plugin immediately.
 
 ---
 
@@ -130,7 +130,7 @@ The wizard will prompt you for:
 To remove the plugin from Hermes (but keep your OKF bundle):
 
 ```bash
-hermes-okf-uninstall
+hermes-okf uninstall-plugin
 ```
 
 This removes `~/.hermes/plugins/hermes-okf/`. Hermes will no longer discover the plugin on startup. Your OKF bundle at `~/.hermes/okf_memory/` remains intact.
@@ -166,7 +166,7 @@ Or activate the venv:
 ```bash
 source ~/.hermes/hermes-agent/venv/bin/activate
 pip install hermes-okf
-hermes-okf-install
+hermes-okf install-plugin
 ```
 
 ---

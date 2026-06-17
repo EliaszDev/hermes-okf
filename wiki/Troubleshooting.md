@@ -6,31 +6,27 @@
 
 ## Installation Issues
 
-### `hermes-okf-install: command not found`
+### `hermes-okf install-plugin` is not found
 
-**Cause:** The script is installed in your Python environment's `bin/` directory, which may not be in your PATH.
+**Cause:** The `hermes-okf` CLI is not installed or not in your PATH.
 
 **Fixes:**
 
-**Option 1 — Use the full path to the Python module:**
+**Option 1 — Upgrade to the latest version:**
 ```bash
-python -m hermes_okf.install_plugin
+pip install --upgrade hermes-okf
+hermes-okf --version
+# Expected: 0.5.0+
 ```
 
-**Option 2 — Activate your virtual environment first:**
+**Option 2 — Use the module form:**
 ```bash
-source /path/to/venv/bin/activate
-hermes-okf-install
+python -m hermes_okf.cli install-plugin
 ```
 
 **Option 3 — Use the venv's Python directly:**
 ```bash
-~/.hermes/hermes-agent/venv/bin/python -m hermes_okf.install_plugin
-```
-
-**Option 4 — If using `uv`:**
-```bash
-uv run --python /path/to/python hermes-okf-install
+~/.hermes/hermes-agent/venv/bin/python -m hermes_okf.cli install-plugin
 ```
 
 ---
@@ -51,7 +47,7 @@ ls ~/.hermes/plugins/hermes-okf/
 
 1. **Run the install command:**
    ```bash
-   hermes-okf-install
+   hermes-okf install-plugin
    ```
 
 2. **Check `plugins.enabled` in `~/.hermes/config.yaml`:**

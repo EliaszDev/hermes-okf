@@ -13,7 +13,7 @@ pip install hermes-okf
 ## Step 2 — Register
 
 ```bash
-hermes-okf-install
+hermes-okf install-plugin
 ```
 
 This does two things automatically:
@@ -49,11 +49,10 @@ You should see your agent config with the correct model from `config.yaml`.
 pip install hermes-okf
 
 # Register (auto-configures everything)
-hermes-okf-install
+hermes-okf install-plugin
 # Output:
 #   Installed hermes-okf plugin to /home/you/.hermes/plugins/hermes-okf
 #   Updated ~/.hermes/config.yaml
-#   Run 'hermes memory setup' to finish activation
 
 # Optional: run setup wizard for bundle path / agent ID
 hermes memory setup
@@ -69,17 +68,17 @@ hermes okf search "Python"
 
 ---
 
-## What if `hermes-okf-install` is not found?
+## What if `hermes-okf install-plugin` is not found?
 
 Use the Python module form:
 
 ```bash
-python -m hermes_okf.install_plugin
+python -m hermes_okf.cli install-plugin
 ```
 
 Or with a virtual environment:
 ```bash
-~/.hermes/hermes-agent/venv/bin/python -m hermes_okf.install_plugin
+~/.hermes/hermes-agent/venv/bin/python -m hermes_okf.cli install-plugin
 ```
 
 ---
@@ -87,7 +86,7 @@ Or with a virtual environment:
 ## Uninstall
 
 ```bash
-hermes-okf-uninstall
+hermes-okf uninstall-plugin
 ```
 
 Removes the plugin from Hermes but keeps your OKF bundle.

@@ -4,7 +4,7 @@ Welcome to the **hermes-okf** wiki. This is the knowledge base for installing, c
 
 ## Quick Links
 
-- [Quick Start](Quick-Start) — **2-step setup: pip install + hermes-okf-install**
+- [Quick Start](Quick-Start) — **2-step setup: pip install + hermes-okf install-plugin**
 - [Installation Guide](Installation-Guide) — Detailed setup with virtual environments
 - [CLI Reference](CLI-Reference) — All commands explained
 - [Troubleshooting](Troubleshooting) — Common issues and fixes
@@ -15,11 +15,11 @@ Welcome to the **hermes-okf** wiki. This is the knowledge base for installing, c
 
 The first open-source memory system built on Google's **Open Knowledge Format (OKF)** for the Hermes agent ecosystem. It gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem.
 
-**Key feature (v0.4.6):** `hermes-okf-install` now **auto-configures `~/.hermes/config.yaml`**. The install flow is just **2 steps**:
+**Key feature (v0.5.0):** `hermes-okf install-plugin` now **auto-configures `~/.hermes/config.yaml`**. The install flow is just **2 steps**:
 
 ```bash
 pip install hermes-okf
-hermes-okf-install
+hermes-okf install-plugin
 ```
 
 Then `hermes` and the plugin is live. No manual YAML editing needed.
@@ -30,15 +30,16 @@ Then `hermes` and the plugin is live. No manual YAML editing needed.
 - 🔗 **Knowledge Graph** — Implicit graph from markdown links
 - 📁 **Filesystem-First** — Plain `.md` + YAML, git-friendly
 - ⚡ **Zero-DB Core** — Single dependency: `pyyaml`
-- 🔌 **Hermes Plugin** — Native `MemoryProvider` ABC integration, discovered via `hermes-okf-install`
+- 🔌 **Hermes Plugin** — Native `MemoryProvider` ABC integration, discovered via `hermes-okf install-plugin`
 - 🔄 **Resume** — Stop and restart, agent restores from OKF bundle
 - 📦 **Portable** — Clone bundle to another machine, resume instantly
 
 ## Latest Version
 
-**v0.4.6** — [View on PyPI](https://pypi.org/project/hermes-okf/)
+**v0.5.0** — [View on PyPI](https://pypi.org/project/hermes-okf/)
 
 **Latest fixes:**
+- v0.5.0 — Unified CLI: `install-plugin`/`uninstall-plugin` subcommands replace standalone scripts
 - v0.4.6 — CLI `--path` works after subcommands; `--version` flag added
 - v0.4.5 — `init --path` fixed; `snapshot` accepts `--agent-id`; cleaner CLI code structure
 - v0.4.4 — CI publish pipeline gating + black formatting fix; `install-plugin`/`uninstall-plugin` in standalone CLI

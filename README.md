@@ -4,9 +4,9 @@
 [![CI](https://github.com/EliaszDev/hermes-okf/actions/workflows/ci.yml/badge.svg)](https://github.com/EliaszDev/hermes-okf/actions)
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![OKF](https://img.shields.io/badge/OKF-v0.4.6-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
+[![OKF](https://img.shields.io/badge/OKF-v0.5.0-green.svg)](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing)
 
-> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. `pip install hermes-okf && hermes-okf-install` — two commands and you're live. The install command auto-configures `~/.hermes/config.yaml` so `hermes memory setup` finds the plugin immediately. `hermes okf search|list|show|snapshot|restore` work out of the box.**
+> **The first open-source memory system built on Google's Open Knowledge Format (OKF) for the Hermes agent ecosystem. `pip install hermes-okf && hermes-okf install-plugin` — two commands and you're live. The install command auto-configures `~/.hermes/config.yaml` so `hermes memory setup` finds the plugin immediately. `hermes okf search|list|show|snapshot|restore` work out of the box.**
 
 Hermes OKF gives your AI agent a **persistent, structured, version-controlled memory** — no database, no lock-in, just markdown + YAML on your filesystem. Every decision, observation, and project context lives in a human-readable knowledge graph that your agent can read, write, and traverse programmatically.
 
@@ -40,13 +40,13 @@ pip install hermes-okf
 Hermes discovers plugins from the `~/.hermes/plugins/` directory. Run the install command to create the plugin wrapper:
 
 ```bash
-hermes-okf-install
+hermes-okf install-plugin
 ```
 
 Expected output:
 ```
 Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
-  Run 'hermes memory setup' to activate
+  Updated ~/.hermes/config.yaml
 ```
 
 > **What this does:** Creates `~/.hermes/plugins/hermes-okf/` and auto-updates `~/.hermes/config.yaml` to add `hermes-okf` to `plugins.enabled` and set `memory.provider`. Hermes finds the plugin on next startup.
@@ -70,7 +70,7 @@ hermes memory setup
 To remove the plugin wrapper from Hermes:
 
 ```bash
-hermes-okf-uninstall
+hermes-okf uninstall-plugin
 ```
 
 This removes `~/.hermes/plugins/hermes-okf/` but does not delete your OKF bundle.
@@ -156,7 +156,7 @@ hermes-okf tools --path ./knowledge
 | 🔗 **Knowledge Graph** | Implicit graph from markdown links — no RDF, no Cypher |
 | 📁 **Filesystem-First** | Plain `.md` + YAML. `cat` it, `grep` it, Git it. |
 | ⚡ **Zero-DB Core** | Single dependency: `pyyaml`. Optional RAG via LangChain/ChromaDB. |
-| 🔌 **Hermes Plugin** | `HermesOKFMemoryProvider` — native `MemoryProvider` ABC, discovered via `hermes-okf-install` |
+| 🔌 **Hermes Plugin** | `HermesOKFMemoryProvider` — native `MemoryProvider` ABC, discovered via `hermes-okf install-plugin` |
 | 🎁 **Hermes-Ready** | Drop-in decorators: `@memorize_decision`, `@memorize_tool` |
 | 🔄 **Resume** | Stop and restart — the agent restores from its OKF bundle |
 | 📦 **Portable** | Clone a bundle to another machine — the agent resumes instantly. |
@@ -192,7 +192,7 @@ hermes-okf tools --path ./knowledge
 │  HUMAN INTERFACE                                              │
 │  ├─ hermes okf search|list|show|snapshot|restore  (Hermes CLI) │
 │  ├─ hermes-okf init|validate|search|show...     (Standalone)  │
-│  ├─ hermes-okf-install / hermes-okf-uninstall  (Plugin mgmt) │
+│  ├─ hermes-okf install-plugin / uninstall-plugin  (Plugin mgmt) │
 ├─────────────────────────────────────────────────────────────┤
 │  HERMES PLUGIN LAYER                                          │
 │  ├─ HermesOKFMemoryProvider  ← MemoryProvider ABC implementation│
@@ -316,26 +316,25 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for full guidelines.
 
 ## Troubleshooting
 
-### `hermes-okf-install: command not found`
+### `hermes-okf install-plugin` fails
 
-The script is installed in your Python environment's `bin/` directory, which may not be in PATH. Use the full path:
+If the command is not found, make sure `hermes-okf` is installed:
 
 ```bash
-# Find your Python environment
-which python
-# Then run:
-/path/to/python -m hermes_okf.install_plugin
+pip install --upgrade hermes-okf
+hermes-okf --version
+# Expected: 0.5.0+
 ```
 
-Or if using a virtual environment:
+If `hermes-okf` itself is not in PATH, use the module form:
+
 ```bash
-source /path/to/venv/bin/activate
-hermes-okf-install
+python -m hermes_okf.cli install-plugin
 ```
 
 ### `hermes memory setup` doesn't show hermes-okf
 
-1. Make sure you ran `hermes-okf-install` (creates `~/.hermes/plugins/hermes-okf/`)
+1. Make sure you ran `hermes-okf install-plugin` (creates `~/.hermes/plugins/hermes-okf/`)
 2. Check the plugin directory exists:
    ```bash
    ls ~/.hermes/plugins/hermes-okf/
@@ -373,7 +372,8 @@ pip install --upgrade hermes-okf
 | # | Feature | Status | Priority | Notes |
 |---|---------|--------|----------|-------|
 | 1 | **Hermes plugin** (`HermesOKFMemoryProvider`) | ✅ Shipped | P0 | Full `MemoryProvider` ABC; `hermes memory setup` integration |
-| 2 | **Plugin installer** (`hermes-okf-install`) | ✅ Shipped | P0 | One-command registration in `~/.hermes/plugins/` |
+| 2 | **Plugin installer** (`hermes-okf install-plugin`) | ✅ Shipped | P0 | One-command registration in `~/.hermes/plugins/` |
+| 3 | **Unified CLI** (`hermes-okf` single entry point) | ✅ Shipped | P0 | `install-plugin`/`uninstall-plugin` subcommands replace standalone scripts |
 | 3 | **Universal provider** (`HermesOKFProvider`) | ✅ Shipped | P0 | Any Hermes agent can use it out of the box |
 | 4 | **Two-memory model** (hot + cold archive) | ✅ Shipped | P0 | Automatic flushing from hot buffer to OKF bundle |
 | 5 | **Model sync** | ✅ Shipped | P0 | OKF config auto-updates from Hermes `config.yaml` |
@@ -387,10 +387,10 @@ pip install --upgrade hermes-okf
 | 13 | **Hermes orchestration** | 🚧 Not started | P3 | Single agent per bundle. No multi-agent coordinator. |
 
 **Legend:**
-- ✅ Shipped — in `hermes-okf` v0.4.5
-- 🚧 Not started — on the backlog; not planned for 0.4.x
+- ✅ Shipped — in `hermes-okf` v0.5.0
+- 🚧 Not started — on the backlog; not planned for 0.5.x
 
-**Current focus:** Bug fixes and Hermes CLI stability (0.4.x). Roadmap items 8–13 are for a 1.0 release.
+**Current focus:** Bug fixes and Hermes CLI stability (0.5.x). Roadmap items 8–13 are for a 1.0 release.
 
 ---
 

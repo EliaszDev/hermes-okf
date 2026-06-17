@@ -17,7 +17,7 @@ Hermes OKF is built on a few simple principles:
 │  HUMAN INTERFACE                                              │
 │  ├─ hermes okf search|list|show|snapshot|restore  (Hermes CLI) │
 │  ├─ hermes-okf init|validate|search|show...     (Standalone)  │
-│  ├─ hermes-okf-install / hermes-okf-uninstall  (Plugin mgmt) │
+│  ├─ hermes-okf install-plugin / uninstall-plugin  (Plugin mgmt) │
 ├─────────────────────────────────────────────────────────────┤
 │  HERMES PLUGIN LAYER                                          │
 │  ├─ HermesOKFMemoryProvider  ← MemoryProvider ABC            │
@@ -77,4 +77,4 @@ Hermes OKF follows the **Google Open Knowledge Format v0.1** draft spec:
 - **Fuzzy search**: Install `rapidfuzz` for Levenshtein distance
 - **Graph export**: `GraphExtractor.to_networkx()` exports to NetworkX for analysis
 - **Custom validators**: Subclass `OKFValidator` and add rules
-- **Plugin installer**: `hermes-okf-install` creates the Hermes plugin wrapper; extend `install_plugin.py` for custom plugin metadata
+- **Plugin installer**: `hermes-okf install-plugin` creates the Hermes plugin wrapper; extend `install_plugin.py` for custom plugin metadata

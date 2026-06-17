@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hermes-okf"
-version = "0.4.6"
+version = "0.5.0"
 description = "Universal OKF-based memory system for Hermes agent — structured, persistent, agent-readable knowledge storage."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -64,8 +64,6 @@ all = [
 
 [project.scripts]
 hermes-okf = "hermes_okf.cli:main"
-hermes-okf-install = "hermes_okf.install_plugin:install_plugin"
-hermes-okf-uninstall = "hermes_okf.install_plugin:uninstall_plugin"
 
 [project.entry-points."hermes.memory_providers"]
 hermes-okf = "hermes_okf.memory_plugin:HermesOKFMemoryProvider"

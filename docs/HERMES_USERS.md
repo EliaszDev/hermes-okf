@@ -17,7 +17,7 @@ pip install hermes-okf
 ### 2. Register the plugin
 
 ```bash
-hermes-okf-install
+hermes-okf install-plugin
 ```
 
 Creates `~/.hermes/plugins/hermes-okf/` so Hermes discovers the plugin.
