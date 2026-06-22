@@ -57,7 +57,8 @@ class HermesOKFConfig:
     log_tool_calls: bool = True
     log_decisions: bool = True
     use_hot_memory: bool = True
-    hot_memory_max: int = 50  # Max items in hot buffer before flush
+    hot_memory_max: int = 50
+    enable_git: bool = False
     enable_rag: bool = False
     rag_model: str = "openai/text-embedding-3-small"
 
@@ -85,6 +86,12 @@ class HermesOKFConfig:
             )
         if os.environ.get("HERMES_OKF_ENABLE_RAG"):
             kwargs["enable_rag"] = os.environ["HERMES_OKF_ENABLE_RAG"].lower() in (
+                "1",
+                "true",
+                "yes",
+            )
+        if os.environ.get("HERMES_OKF_ENABLE_GIT"):
+            kwargs["enable_git"] = os.environ["HERMES_OKF_ENABLE_GIT"].lower() in (
                 "1",
                 "true",
                 "yes",
@@ -216,10 +223,28 @@ class HermesOKFProvider:
             model=self.config.model or "openai/gpt-4o",
         )
         self.hot = HotMemoryBuffer(max_items=self.config.hot_memory_max)
+
+        # Optionally swap to Git-backed bundle
+        if self.config.enable_git:
+            try:
+                from hermes_okf.git_bundle import GitOKFBundle
+
+                self.agent.memory.bundle = GitOKFBundle(self.config.bundle_path)
+            except ImportError:
+                pass  # gitpython not installed, continue with regular OKFBundle
+
         self._search_index = SearchIndex(self.agent.memory.bundle)
 
         # Ensure the bundle has the Hermes-native structure
         self._ensure_directories()
+
+    # -- Git helpers ------------------------------------------------------
+
+    def _maybe_git_commit(self, action: str, **kwargs: Any) -> None:
+        """Auto-commit if GitOKFBundle is active."""
+        bundle = self.agent.memory.bundle
+        if hasattr(bundle, "auto_commit"):
+            bundle.auto_commit(action, agent_id=self.config.agent_id, **kwargs)
 
     # -- Bundle structure -------------------------------------------------
 
@@ -254,6 +279,12 @@ class HermesOKFProvider:
         self.agent.end_session()
         if self.config.auto_snapshot:
             self.agent.snapshot(note=f"Session {session_id} end")
+        self._maybe_git_commit(
+            "session_end",
+            session_id=session_id,
+            concept_count=len(self.agent.memory.bundle.list_concepts()),
+            tool_call_count=0,
+        )
 
     # -- Memory hooks -----------------------------------------------------
 
@@ -311,6 +342,7 @@ class HermesOKFProvider:
                 tags=tags or ["decision"],
             )
         self._maybe_flush()
+        self._maybe_git_commit("decision", title=decision)
 
     # -- Plan hooks -------------------------------------------------------
 
@@ -330,6 +362,12 @@ class HermesOKFProvider:
         self._flush_hot()
         if self.config.auto_snapshot:
             self.agent.snapshot(note=f"Plan complete: {plan_id}")
+        self._maybe_git_commit(
+            "plan_complete",
+            plan_name=plan_id,
+            steps_completed=0,
+            steps_total=0,
+        )
 
     # -- Tool registry ----------------------------------------------------
 
@@ -350,6 +388,7 @@ class HermesOKFProvider:
         """Save a full agent state snapshot."""
         self._flush_hot()
         self.agent.snapshot(note=note)
+        self._maybe_git_commit("snapshot", note=note)
 
     def restore(self) -> dict[str, Any]:
         """Restore agent from last snapshot."""

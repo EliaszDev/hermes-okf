@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.8] - 2026-06-16
+
+### Added
+- `GitOKFBundle` — Git-backed OKF bundle for audit history and rollback. Wraps `gitpython` around `OKFBundle` to provide automatic commit tracking on significant agent events. Opt-in via `enable_git: true` in config or `HERMES_OKF_ENABLE_GIT=1` env var.
+- Auto-commit triggers: `on_session_end`, `snapshot`, `on_plan_complete`, `on_decision` — each creates a structured Git commit with `[session]`, `[snapshot]`, `[plan]`, or `[decision]` prefix.
+- `hermes-okf log --git` — show Git history alongside agent log. Supports `--oneline` for compact output and `--limit` for max commits.
+- `hermes-okf diff` — show file-level diff between Git refs (e.g. `HEAD~1` vs `HEAD`).
+- `hermes-okf revert` — restore OKF bundle to a previous Git ref, creating a new commit that preserves history.
+- `GitOKFBundle` exported from `hermes_okf` package root (`from hermes_okf import GitOKFBundle`).
+- `enable_git` config field in `HermesOKFConfig` — read from env var, config file, or Hermes main config.
+- `[git]` optional dependency: `pip install hermes-okf[git]` installs `gitpython>=3.1.0`.
+- `.gitignore` auto-generated in Git-backed bundles — excludes `.okf_index/`, `.chroma/`, `__pycache__/`, `*.pyc`.
+
+### Changed
+- `HermesOKFProvider` optionally swaps `OKFBundle` for `GitOKFBundle` when `enable_git=True` is set.
+
 ## [0.5.5] - 2026-06-16
 
 ### Added

@@ -88,6 +88,30 @@ def _search(args: argparse.Namespace) -> int:
 
 
 def _log(args: argparse.Namespace) -> int:
+    if args.git:
+        try:
+            from hermes_okf.git_bundle import GitOKFBundle
+
+            git_bundle = GitOKFBundle(args.path)
+            commits = git_bundle.git_log(limit=args.limit)
+            if not commits:
+                print("No Git history yet.")
+                return 0
+            for c in commits:
+                if args.oneline:
+                    print(f"{c['hex'][:8]}  {c['message']}")
+                else:
+                    print(f"commit {c['hex']}")
+                    print(f"Author: {c['author']}")
+                    print(f"Date:   {c['date']}")
+                    print()
+                    print(f"    {c['message']}")
+                    print()
+            return 0
+        except ImportError:
+            print("Git history requires gitpython. Install: pip install hermes-okf[git]")
+            return 1
+
     bundle = OKFBundle(args.path)
     log = bundle.read_log()
     if not log:
@@ -95,6 +119,39 @@ def _log(args: argparse.Namespace) -> int:
         return 0
     print(log)
     return 0
+
+
+def _diff(args: argparse.Namespace) -> int:
+    try:
+        from hermes_okf.git_bundle import GitOKFBundle
+
+        bundle = GitOKFBundle(args.path)
+        changes = bundle.git_diff(args.from_ref, args.to_ref)
+        if not changes:
+            print("No changes.")
+            return 0
+        for ch in changes:
+            print(f"{ch['path']}: +{ch['additions']} -{ch['deletions']}")
+        return 0
+    except ImportError:
+        print("Git diff requires gitpython. Install: pip install hermes-okf[git]")
+        return 1
+
+
+def _revert(args: argparse.Namespace) -> int:
+    try:
+        from hermes_okf.git_bundle import GitOKFBundle
+
+        bundle = GitOKFBundle(args.path)
+        sha = bundle.git_revert(args.ref)
+        if sha:
+            print(f"Reverted to {args.ref}. New commit: {sha[:8]}")
+        else:
+            print("Nothing to revert.")
+        return 0
+    except ImportError:
+        print("Git revert requires gitpython. Install: pip install hermes-okf[git]")
+        return 1
 
 
 def _append_log(args: argparse.Namespace) -> int:
@@ -253,7 +310,35 @@ def main(argv: list[str] | None = None) -> int:
 
     # log
     log_parser = subparsers.add_parser("log", parents=[path_parent], help="Show agent log")
+    log_parser.add_argument(
+        "--git", action="store_true", help="Show Git history instead of agent log"
+    )
+    log_parser.add_argument(
+        "--oneline", action="store_true", help="Compact one-line Git log output"
+    )
+    log_parser.add_argument(
+        "--limit", type=int, default=10, help="Max commits in Git log (default: 10)"
+    )
     log_parser.set_defaults(func=_log)
+
+    # diff
+    diff_parser = subparsers.add_parser(
+        "diff", parents=[path_parent], help="Show diff between Git refs"
+    )
+    diff_parser.add_argument(
+        "from_ref", nargs="?", default="HEAD~1", help="Start ref (default: HEAD~1)"
+    )
+    diff_parser.add_argument("to_ref", nargs="?", default="HEAD", help="End ref (default: HEAD)")
+    diff_parser.set_defaults(func=_diff)
+
+    # revert
+    revert_parser = subparsers.add_parser(
+        "revert", parents=[path_parent], help="Restore bundle to a Git ref"
+    )
+    revert_parser.add_argument(
+        "ref", nargs="?", default="HEAD~1", help="Ref to restore (default: HEAD~1)"
+    )
+    revert_parser.set_defaults(func=_revert)
 
     # log-append
     log_append_parser = subparsers.add_parser(

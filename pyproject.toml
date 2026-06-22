@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hermes-okf"
-version = "0.5.5"
+version = "0.5.8"
 description = "Universal OKF-based memory system for Hermes agent — structured, persistent, agent-readable knowledge storage."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -43,6 +43,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+git = [
+    "gitpython>=3.1.0",
+]
 rag = [
     "langchain>=0.2.0",
     "langchain-community>=0.2.0",
@@ -57,9 +60,10 @@ dev = [
     "mypy>=1.9",
     "pre-commit>=3.7",
     "types-PyYAML>=6.0",
+    "gitpython>=3.1.0",
 ]
 all = [
-    "hermes-okf[rag,dev]",
+    "hermes-okf[rag,git,dev]",
 ]
 
 [project.scripts]
