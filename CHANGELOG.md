@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.5] - 2026-06-16
+
+### Added
+- `ConfigValidator` — 15-check Hermes plugin configuration validator. Validates the most common setup issues (missing plugin dir, corrupt YAML, wrong `plugins.enabled` type, missing `hermes-okf` in enabled list, etc.) and prints human-readable fix instructions.
+- `hermes-okf validate-config` CLI subcommand — run all 15 checks from the command line. Exit code 0 = all critical checks pass, exit code 1 = one or more critical failures.
+- `ConfigValidator` exported from `hermes_okf` package root (`from hermes_okf import ConfigValidator`).
+- Comprehensive test suite for `ConfigValidator` — 17 tests covering happy path, critical failures, warnings, edge cases, and format report validation.
+
 ## [0.5.0] - 2026-06-15
 
 ### Changed

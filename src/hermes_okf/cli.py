@@ -189,6 +189,15 @@ def _tools(args: argparse.Namespace) -> int:
     return 0
 
 
+def _validate_config(args: argparse.Namespace) -> int:
+    from hermes_okf.config_validator import ConfigValidator, format_report
+
+    validator = ConfigValidator()
+    report = validator.validate()
+    print(format_report(report))
+    return 0 if report.passed else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="hermes-okf",
@@ -218,6 +227,12 @@ def main(argv: list[str] | None = None) -> int:
         "validate", parents=[path_parent], help="Validate OKF conformance"
     )
     validate_parser.set_defaults(func=_validate)
+
+    # validate-config (no --path needed — checks ~/.hermes/)
+    validate_config_parser = subparsers.add_parser(
+        "validate-config", help="Validate Hermes plugin configuration"
+    )
+    validate_config_parser.set_defaults(func=_validate_config)
 
     # list
     list_parser = subparsers.add_parser("list", parents=[path_parent], help="List concepts")
