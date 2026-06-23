@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.9] - 2026-06-16
+
+### Added
+- `docs/CONFIG_VALIDATOR.md` — comprehensive user guide for the config validator (15 checks, exit codes, common failures, programmatic use).
+- `docs/GIT_HISTORY.md` — user guide for Git-backed bundles (quick start, CLI commands, programmatic use, error handling).
+- `wiki/Config-Validator.md` — wiki version of config validator guide.
+- `wiki/Git-History.md` — wiki version of Git history guide.
+
+### Changed
+- `wiki/Quick-Start.md` — added Step 3 (`validate-config`) to the install flow.
+- `wiki/Troubleshooting.md` — added `validate-config` as the first diagnostic step for discovery issues.
+
 ## [0.5.8] - 2026-06-16
 
 ### Added

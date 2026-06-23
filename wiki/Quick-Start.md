@@ -20,6 +20,22 @@ This does two things automatically:
 1. Creates `~/.hermes/plugins/hermes-okf/` so Hermes discovers the plugin
 2. Updates `~/.hermes/config.yaml` to add `hermes-okf` to `plugins.enabled` and set `memory.provider`
 
+## Step 3 — Validate
+
+```bash
+hermes-okf validate-config
+```
+
+Runs 15 checks in 5 seconds. If everything passes, you'll see:
+
+```
+✅ hermes-okf v0.5.8 — all critical checks passed
+Hermes should discover hermes-okf on next startup.
+Run 'hermes' to start.
+```
+
+If something fails, the validator prints the exact fix command.
+
 ---
 
 ## Done. Start Hermes.

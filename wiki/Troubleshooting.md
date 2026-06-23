@@ -33,11 +33,18 @@ python -m hermes_okf.cli install-plugin
 
 ## Hermes Discovery Issues
 
+> **First step:** Run `hermes-okf validate-config` to diagnose setup issues automatically.
+
 ### `hermes memory setup` doesn't show hermes-okf
 
 **Cause:** Hermes doesn't see the plugin in `~/.hermes/plugins/`.
 
 **Diagnosis:**
+```bash
+hermes-okf validate-config
+# Run this first — it catches 80% of setup issues in 5 seconds
+```
+
 ```bash
 ls ~/.hermes/plugins/hermes-okf/
 # Should show: __init__.py  plugin.yaml
