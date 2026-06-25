@@ -45,37 +45,83 @@
 
 ## Architecture
 
+```mermaid
+flowchart TD
+    subgraph UI["Human Interface"]
+        U1["hermes okf search|list|show|snapshot|restore"]
+        U2["hermes-okf init|validate|search|show..."]
+        U3["hermes-okf install-plugin|uninstall-plugin"]
+        U4["hermes-okf validate-config"]
+    end
+
+    subgraph Plugin["Hermes Plugin Layer"]
+        P1["HermesOKFMemoryProvider"]
+        P2["plugin.py / cli_extension.py"]
+        P3["install_plugin.py"]
+    end
+
+    subgraph Universal["Universal Provider"]
+        V1["HermesOKFProvider"]
+        V2["HermesAgent / MemoryMixin"]
+        V3["HotMemoryBuffer"]
+        V4["ConfigValidator"]
+    end
+
+    subgraph Core["Core OKF Layer"]
+        C1["OKFBundle"]
+        C2["GitOKFBundle"]
+        C3["Concept"]
+        C4["GraphExtractor"]
+        C5["SearchIndex"]
+        C6["OKFValidator"]
+    end
+
+    subgraph Persist["Persistence"]
+        FS["Filesystem<br>markdown + YAML frontmatter"]
+    end
+
+    UI --> Plugin
+    Plugin --> Universal
+    Universal --> Core
+    Core --> Persist
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│  HUMAN INTERFACE                                                     │
-│  ├─ hermes okf search|list|show|snapshot|restore    (Hermes CLI)   │
-│  ├─ hermes-okf init|validate|search|show...         (Standalone)   │
-│  ├─ hermes-okf install-plugin|uninstall-plugin      (Plugin mgmt)  │
-│  └─ hermes-okf validate-config                      (Diagnostics)  │
-├────────────────────────────────────────────────────────────────────┤
-│  HERMES PLUGIN LAYER                                                 │
-│  ├─ HermesOKFMemoryProvider  ← MemoryProvider ABC implementation    │
-│  ├─ plugin.py / cli_extension.py  ← CLI registration bridge         │
-│  └─ install_plugin.py  ← Creates ~/.hermes/plugins/hermes-okf/     │
-├────────────────────────────────────────────────────────────────────┤
-│  UNIVERSAL PROVIDER                                                  │
-│  ├─ HermesOKFProvider  ← Any Hermes agent can use it               │
-│  ├─ HermesAgent / MemoryMixin  ← Drop-in decorators               │
-│  ├─ HotMemoryBuffer  ← In-process fast write buffer               │
-│  └─ ConfigValidator  ← 15-check Hermes plugin diagnostics          │
-├────────────────────────────────────────────────────────────────────┤
-│  CORE OKF LAYER                                                      │
-│  ├─ OKFBundle  ← File I/O, concept CRUD, logging                 │
-│  ├─ GitOKFBundle  ← Optional Git-backed history (auto-commit)      │
-│  ├─ Concept  ← Dataclass: type, title, body, metadata              │
-│  ├─ GraphExtractor  ← Link traversal, tag clustering               │
-│  ├─ SearchIndex  ← Full-text + fuzzy search                      │
-│  └─ OKFValidator  ← Conformance checking                           │
-├────────────────────────────────────────────────────────────────────┤
-│  PERSISTENCE                                                         │
-│  └─ Filesystem (markdown + YAML frontmatter)                       │
-└────────────────────────────────────────────────────────────────────┘
+
+*Rendered as a diagram on GitHub. On other platforms, see the text version below.*
+
+<details>
+<summary>Text version (for non-GitHub renderers)</summary>
+
 ```
+Layer: Human Interface
+  ├── hermes okf search|list|show|snapshot|restore  (Hermes CLI)
+  ├── hermes-okf init|validate|search|show...       (Standalone)
+  ├── hermes-okf install-plugin|uninstall-plugin    (Plugin mgmt)
+  └── hermes-okf validate-config                    (Diagnostics)
+
+Layer: Hermes Plugin
+  ├── HermesOKFMemoryProvider  <- MemoryProvider ABC
+  ├── plugin.py / cli_extension.py  <- CLI bridge
+  └── install_plugin.py  <- Creates ~/.hermes/plugins/hermes-okf/
+
+Layer: Universal Provider
+  ├── HermesOKFProvider  <- Any Hermes agent
+  ├── HermesAgent / MemoryMixin  <- Decorators
+  ├── HotMemoryBuffer  <- Fast write buffer
+  └── ConfigValidator  <- 15-check diagnostics
+
+Layer: Core OKF
+  ├── OKFBundle  <- File I/O, CRUD, logging
+  ├── GitOKFBundle  <- Optional Git history
+  ├── Concept  <- Dataclass
+  ├── GraphExtractor  <- Link traversal
+  ├── SearchIndex  <- Full-text search
+  └── OKFValidator  <- Conformance
+
+Layer: Persistence
+  └── Filesystem (markdown + YAML frontmatter)
+```
+
+</details>
 
 - Full architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - Config validator: [`docs/CONFIG_VALIDATOR.md`](docs/CONFIG_VALIDATOR.md)
