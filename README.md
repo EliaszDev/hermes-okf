@@ -51,7 +51,23 @@ Installed hermes-okf plugin to /home/username/.hermes/plugins/hermes-okf
 
 > **What this does:** Creates `~/.hermes/plugins/hermes-okf/` and auto-updates `~/.hermes/config.yaml` to add `hermes-okf` to `plugins.enabled` and set `memory.provider`. Hermes finds the plugin on next startup.
 
-### Step 3 — Activate the memory provider
+### Step 3 — Validate the setup
+
+```bash
+hermes-okf validate-config
+```
+
+Runs 15 checks in 5 seconds. If everything passes, you'll see:
+
+```
+✅ hermes-okf v0.5.9 — all critical checks passed
+Hermes should discover hermes-okf on next startup.
+Run 'hermes' to start.
+```
+
+If something fails, the validator prints the exact fix command.
+
+### Step 4 — Activate the memory provider
 
 Start Hermes and select `hermes-okf` from the interactive setup:
 
@@ -104,6 +120,9 @@ The `show` command displays the full concept with YAML frontmatter and markdown 
 Even without the Hermes plugin, you can use `hermes-okf` as a standalone knowledge management tool:
 
 ```bash
+# Validate Hermes plugin configuration
+hermes-okf validate-config
+
 # Initialise a new OKF bundle
 hermes-okf init ./knowledge
 
@@ -121,6 +140,15 @@ hermes-okf search --path ./knowledge "ffmpeg GPU"
 
 # View log
 hermes-okf log --path ./knowledge
+hermes-okf log --path ./knowledge --git          # Git history
+hermes-okf log --path ./knowledge --git --oneline # Compact view
+
+# Show diff between commits
+hermes-okf diff --path ./knowledge HEAD~1
+hermes-okf diff --path ./knowledge HEAD~5..HEAD
+
+# Revert to previous state
+hermes-okf revert --path ./knowledge HEAD~1
 
 # Append to log
 hermes-okf log-append --path ./knowledge "New decision made" --category Decision
@@ -154,7 +182,9 @@ hermes-okf tools --path ./knowledge
 | 🔌 **Hermes Plugin** | `HermesOKFMemoryProvider` — native `MemoryProvider` ABC, discovered via `hermes-okf install-plugin` |
 | 🎁 **Hermes-Ready** | Drop-in decorators: `@memorize_decision`, `@memorize_tool` |
 | 🔄 **Resume** | Stop and restart — the agent restores from its OKF bundle |
-| 📦 **Portable** | Clone a bundle to another machine — the agent resumes instantly. |
+| 📦 **Portable** | Clone a bundle to another machine — the agent resumes instantly |
+| 🩺 **Config Validator** | `hermes-okf validate-config` — 15 checks, catches 80% of setup issues |
+| 📜 **Git History** | Opt-in `GitOKFBundle` — auto-commit on every session, diff, revert |
 
 ---
 
@@ -188,6 +218,7 @@ hermes-okf tools --path ./knowledge
 │  ├─ hermes okf search|list|show|snapshot|restore  (Hermes CLI) │
 │  ├─ hermes-okf init|validate|search|show...     (Standalone)  │
 │  ├─ hermes-okf install-plugin / uninstall-plugin  (Plugin mgmt) │
+│  ├─ hermes-okf validate-config  ← 15-check diagnostic            │
 ├─────────────────────────────────────────────────────────────┤
 │  HERMES PLUGIN LAYER                                          │
 │  ├─ HermesOKFMemoryProvider  ← MemoryProvider ABC implementation│
@@ -198,9 +229,11 @@ hermes-okf tools --path ./knowledge
 │  ├─ HermesOKFProvider  ← Any Hermes agent can use it          │
 │  ├─ HermesAgent / MemoryMixin  ← Drop-in decorators           │
 │  ├─ HotMemoryBuffer  ← In-process fast write buffer           │
+│  ├─ ConfigValidator  ← 15-check Hermes plugin diagnostics       │
 ├─────────────────────────────────────────────────────────────┤
 │  CORE OKF LAYER                                               │
 │  ├─ OKFBundle  ← File I/O, concept CRUD, logging            │
+│  ├─ GitOKFBundle  ← Optional Git-backed history (auto-commit)│
 │  ├─ Concept  ← Dataclass: type, title, body, metadata         │
 │  ├─ GraphExtractor  ← Link traversal, tag clustering          │
 │  ├─ SearchIndex  ← Full-text + fuzzy search                 │
@@ -211,7 +244,9 @@ hermes-okf tools --path ./knowledge
 └─────────────────────────────────────────────────────────────┘
 ```
 
-Read the full architecture in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Read the full architecture in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).  
+Config validator guide: [`docs/CONFIG_VALIDATOR.md`](docs/CONFIG_VALIDATOR.md)  
+Git history guide: [`docs/GIT_HISTORY.md`](docs/GIT_HISTORY.md)
 
 ---
 
@@ -318,7 +353,7 @@ If the command is not found, make sure `hermes-okf` is installed:
 ```bash
 pip install --upgrade hermes-okf
 hermes-okf --version
-# Expected: 0.5.0+
+# Expected: 0.5.9+
 ```
 
 If `hermes-okf` itself is not in PATH, use the module form:
@@ -362,6 +397,27 @@ pip install --upgrade hermes-okf
 
 ---
 
+## What's New in v0.5.9
+
+v0.5.9 polishes the v0.5.5 (config validator) and v0.5.8 (Git history) releases with complete documentation.
+
+| Feature | Status | How to use |
+|---------|--------|------------|
+| **Config Validator** | ✅ Shipped | `hermes-okf validate-config` — 15 checks, 5 seconds, exit 0/1 |
+| **Git-backed History** | ✅ Shipped | `pip install hermes-okf[git]`, `enable_git: true` in config |
+| **Git CLI** | ✅ Shipped | `hermes-okf log --git`, `hermes-okf diff`, `hermes-okf revert` |
+| **Docs** | ✅ Shipped | `docs/CONFIG_VALIDATOR.md`, `docs/GIT_HISTORY.md`, wiki updates |
+
+### Upgrading
+
+```bash
+pip install --upgrade hermes-okf
+```
+
+No configuration changes needed — the plugin automatically uses the new integration.
+
+---
+
 ## What's New in v0.5.0
 
 **Critical memory provider integration fix.** Previous versions shipped the OKF CLI and plugin skeleton, but the agent-side integration was broken — `handle_tool_call()` raised `NotImplementedError`, `queue_prefetch()` was a no-op, and `system_prompt_block()` didn't instruct the agent to use memory tools. Users had to manually edit their system prompt ("soul md") to get data retrieval working.
@@ -400,18 +456,19 @@ No configuration changes needed — the plugin automatically uses the new integr
 | 5 | **Model sync** | ✅ Shipped | P0 | OKF config auto-updates from Hermes `config.yaml` |
 | 6 | **Concept inspector** (`show` command) | ✅ Shipped | P0 | Inspect any concept with metadata + body |
 | 7 | **CI/CD gating** | ✅ Shipped | P0 | Tests must pass before PyPI publish; skip duplicates |
-| 8 | **Async I/O** | 🚧 Not started | P2 | All file ops are sync today. Needed for high-throughput agents. |
-| 9 | **Git-backed history** | 🚧 Not started | P1 | Bundle is markdown files — `git init` works manually. No programmatic diff/rollback yet. |
-| 10 | **Web viewer** | 🚧 Not started | P1 | CLI-only today. A small FastAPI/HTML viewer would unlock graph exploration. |
-| 11 | **Plugin system** (custom types/validators) | 🚧 Not started | P2 | `OKFValidator` is hardcoded. No custom concept types or validator hooks. |
-| 12 | **Multi-agent merge** | 🚧 Not started | P2 | Each agent is isolated. No `merge_bundles()` or conflict resolution API. |
-| 13 | **Hermes orchestration** | 🚧 Not started | P3 | Single agent per bundle. No multi-agent coordinator. |
+| 8 | **Config Validator** (`validate-config`) | ✅ Shipped | P0 | 15 checks, 5 seconds, exit 0/1 |
+| 9 | **Git-backed history** | ✅ Shipped | P1 | `GitOKFBundle` — auto-commit, diff, revert |
+| 10 | **Async I/O** | 🚧 Not started | P2 | All file ops are sync today |
+| 11 | **Web viewer** | 🚧 Not started | P1 | CLI-only today. A small FastAPI/HTML viewer |
+| 12 | **Plugin system** (custom types/validators) | 🚧 Not started | P2 | `OKFValidator` is hardcoded |
+| 13 | **Multi-agent merge** | 🚧 Not started | P2 | Each agent is isolated |
+| 14 | **Hermes orchestration** | 🚧 Not started | P3 | Single agent per bundle |
 
 **Legend:**
-- ✅ Shipped — in `hermes-okf` v0.5.0
+- ✅ Shipped — in `hermes-okf` v0.5.9
 - 🚧 Not started — on the backlog; not planned for 0.5.x
 
-**Current focus:** v0.5.0 unifies the CLI (`install-plugin`/`uninstall-plugin` subcommands) and fixes the critical memory provider integration. Roadmap items 8–13 are for a 1.0 release.
+**Current focus:** v0.5.9 completes the "Git + Diagnostics" milestone. v0.5.8+ performance (search index, bundle compression) is next. Roadmap items 10–14 are for a 1.0 release.
 
 ---
 
